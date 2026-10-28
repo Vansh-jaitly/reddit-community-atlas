@@ -1,3 +1,5 @@
+> **Historical (V1 deck).** These notes belong to `Reddit_Bridge_Network_Analysis_Presentation.pptx`, the V1 baseline presentation. The final deck is `docs/presentation/Community_Atlas.pptx`; its speaker notes are embedded in the slides.
+
 # Speaker notes — Beyond the Hairball
 
 ## Slide 1 — Title

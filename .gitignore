@@ -16,3 +16,6 @@ data_curation/data/raw_TEST/
 .pytest_cache/
 # DuckDB spill directory
 .tmp/
+
+# Deck builder dependencies
+tools/deck/node_modules/

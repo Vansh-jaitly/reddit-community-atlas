@@ -1,0 +1,557 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Beyond the Hairball: The Reddit Community Atlas</title>
+<style>
+body{font:11pt/1.55 "Segoe UI",system-ui,sans-serif;color:#1b1b1a;max-width:860px;margin:32px auto;padding:0 24px}
+h1{font-size:24pt;letter-spacing:-.01em;margin:0 0 6px} h2{font-size:15pt;margin:28px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}
+h3{font-size:12.5pt;margin:20px 0 6px} table{border-collapse:collapse;width:100%;font-size:9.5pt;margin:10px 0}
+th,td{border-bottom:1px solid #e3e2dc;padding:5px 6px;text-align:left;vertical-align:top} th{background:#f4f3ef}
+img{max-width:100%;border:1px solid #ddd;border-radius:6px;margin:8px 0} code{background:#f4f3ef;padding:1px 4px;border-radius:3px;font-size:9.5pt}
+pre{background:#f4f3ef;padding:10px;border-radius:6px;overflow:auto} hr{border:0;border-top:1px solid #e3e2dc;margin:20px 0}
+@media print{h2{page-break-after:avoid} img,table{page-break-inside:avoid}}
+</style></head><body><h1 id="beyond-the-hairball-the-reddit-community-atlas">Beyond the Hairball: The Reddit Community Atlas</h1>
+<p><strong>What really connects Reddit's communities? An interactive, statistically validated map of shared audiences across 170 subreddits (Oct 2017 – Sep 2018)</strong></p>
+<p>CSE3729 Computational Social Media Analysis · BML Munjal University · Academic year 2026–27</p>
+<p>Team: Akashita (230779), Vansh Jaitly (230687) · see <code>docs/CONTRIBUTION_MATRIX.md</code></p>
+<p><em>Every number in this report is generated from the project's build artifacts by <code>tools/build_docs.py</code>; Appendix A maps each headline figure to the file it comes from.</em></p>
+<hr />
+<h2 id="abstract">Abstract</h2>
+<p>Online communities are often mapped through the audiences they share, but raw shared-audience networks mostly measure size: one person who comments in many places links all of them, and the biggest communities look close to everything. We collected 223,218,978 public Reddit comments from a fixed, rule-based frame of 170 subreddits over 12 months (Oct 2017 – Sep 2018), cleaned them to 210,325,806 comments by 2,446,462 pseudonymised commenters, and built a user × subreddit network. The conventional cosine projection links 99.99% of all subreddit pairs. Comparing each pair's shared commenters with the number expected from community size and user activity alone (the Bipartite Configuration Model, BiCM) and keeping only pairs that exceed it at a 1% false discovery rate leaves 13.9% of pairs. That network has a clear, reproducible structure: 9 communities (weighted modularity 0.577, seed agreement ARI 0.995), stable connector roles, and 82%–85% of links recurring between consecutive quarters. We built the results into an interactive web application, the Community Atlas, with four guided stories: what popularity hides, unexpected neighbours, hidden connectors, and how community ties respond when crowds arrive and leave. The project started as a test of whether cross-community "bridge positions" outlast their occupants. It evolved after the first, cosine-based pipeline proved too dense to measure bridges at all. The findings are descriptive and specific to this sample.</p>
+<hr />
+<h2 id="1-introduction-and-research-questions">1. Introduction and research questions</h2>
+<p>Reddit is organised into hundreds of thousands of topical communities. Which of them share an audience, and why, is a basic question about how online attention is organised. It matters for information spread, community moderation and for any study that treats subreddits as separate populations. The usual way to answer it is a bipartite network of users and communities, <em>projected</em> onto the communities: two subreddits are linked when people comment in both.</p>
+<p>The project began with a narrower, longitudinal question (the <strong>submitted proposal</strong>): <em>do cross-community bridge positions persist across quarters even when the people occupying them change?</em> Our first full pipeline (V1, §7) built that analysis on a cosine-similarity projection. On real data, the projection connected 99.85% of subreddit pairs. It produced only four communities and so only six possible bridge positions, all saturated. The bridge question could not be answered with that measurement lens. The final project therefore asks three questions that the data can support, and keeps the bridge idea as a measured connector role:</p>
+<ul>
+<li><strong>RQ1 (representation).</strong> How much of the audience overlap between subreddits is explained by community size and user activity alone?</li>
+<li><strong>RQ2 (structure).</strong> Which communities share <em>surprisingly</em> large audiences, and what communities and connectors do those relationships form?</li>
+<li><strong>RQ3 (change).</strong> How stable are these relationships over time, and how do they respond when a crowd suddenly arrives or leaves?</li>
+</ul>
+<p>The deliverable is an end-to-end, reproducible pipeline and an interactive application (the <strong>Community Atlas</strong>) through which an evaluator can explore the evidence.</p>
+<hr />
+<h2 id="2-literature-review">2. Literature review</h2>
+<p><strong>Projections are dense by construction.</strong> A one-mode projection of a bipartite network is a union of cliques: every user active in <em>k</em> communities adds a link between all <em>k</em> of them, and high-degree nodes share neighbours by chance (Saracco et al., 2017; Larremore et al., 2014). The same mechanism explains our 99.9%-dense V1 network. Olson and Neal (2015) met it on Reddit itself and extracted a subreddit "backbone" with the disparity filter of Serrano et al. (2009). That filter compares each edge with a per-node uniform null and ignores the bipartite origin of the weights. Coscia and Rossi (2019, preprint) show that the choice of projection and backbone changes substantive conclusions.</p>
+<p><strong>Validating projections against a null model.</strong> The Bipartite Configuration Model (Saracco et al., 2015) is a maximum-entropy random network that preserves, on average, every node's degree on both sides: here, each user's number of subreddits and each subreddit's number of commenters. Under it, the number of users shared by two communities follows a Poisson-binomial distribution, so each pair can be tested and the tests corrected for multiplicity with the Benjamini–Hochberg false discovery rate (Saracco et al., 2017). Neal, Domagalski and Sagan (2021) compare alternatives to the exact fixed-degree model and recommend this "stochastic degree sequence" approach with BiCM probabilities when exact sampling is impractical, as it is for 2,446,462 users. Cimini et al. (2022) show that different null models disagree at a fixed p-value but agree at matched density. This is why we report densities and run a sensitivity check rather than trusting one threshold. Applications to social media include validated projections of Twitter user networks (Becatti et al., 2019; Caldarelli et al., 2020). Waller and Anderson (2021) make the same conceptual move for Reddit at scale: communities are related when their user bases are "surprisingly similar" beyond chance.</p>
+<p><strong>Communities, roles and time.</strong> We detect communities with Leiden (Traag, Waltman &amp; van Eck, 2019), which guarantees connected communities. Good, de Montjoye and Clauset (2010) show that modularity has many near-optimal partitions, so we report seed agreement and sensitivity rather than a single partition. A subreddit's connector role is measured with the participation coefficient of Guimerà and Amaral (2005). Communities and links are compared across time by Jaccard matching (Greene, Doyle &amp; Cunningham, 2010). Text-free event studies of Reddit measure active users and newcomers around documented dates and mask archive outages (Horta Ribeiro et al., 2021). Crypto-community activity co-moves with prices during bubbles, without implying causation (Phillips &amp; Gorse, 2018).</p>
+<p><strong>Visualisation and storytelling.</strong> The Atlas follows Shneiderman's (1996) "overview first, zoom and filter, details on demand". Its stories use the "martini glass" structure of Segel and Heer (2010): a short author-driven sequence that opens into free exploration. Node-link diagrams of dense graphs are hard to read (Ghoniem, Fekete &amp; Castagliola, 2005), which is one more reason to show the validated network. Following Archambault, Purchase and Pinaud (2011), time comparisons are shown side by side by default. The force-directed layout is treated as an approximation in which distance is not literal (Jacomy et al., 2014).</p>
+<p><strong>Data quality and ethics.</strong> Pushshift-derived archives, which the Arctic Shift data repackages (Baumgartner et al., 2020), have bursty missing data; network analyses of such data are among the most exposed to it (Gaffney &amp; Matias, 2018). Social-media samples are not populations, and platform design shapes what can be measured (Ruths &amp; Pfeffer, 2014). Reddit research ethics stresses aggregation and care with sensitive communities (Proferes et al., 2021).</p>
+<p><strong>Evidence matrix (selected sources).</strong></p>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Contribution</th>
+<th>Decision it informs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Saracco et al. (2015, 2017)</td>
+<td>BiCM; Poisson-binomial test of shared neighbours with FDR</td>
+<td>The edge definition</td>
+</tr>
+<tr>
+<td>Neal et al. (2021); Cimini et al. (2022)</td>
+<td>Comparison of null models; agreement at matched density</td>
+<td>BiCM over exact sampling; report density and sensitivity</td>
+</tr>
+<tr>
+<td>Larremore et al. (2014)</td>
+<td>Projections lose information; bipartite SBM</td>
+<td>Rejected direct SBM on 2,446,462 users as disproportionate</td>
+</tr>
+<tr>
+<td>Serrano et al. (2009); Olson &amp; Neal (2015)</td>
+<td>Disparity-filter backbones, including on Reddit</td>
+<td>V1 display baseline; Reddit precedent</td>
+</tr>
+<tr>
+<td>Waller &amp; Anderson (2021)</td>
+<td>Reddit communities related by beyond-chance overlap</td>
+<td>Supports observed ÷ expected</td>
+</tr>
+<tr>
+<td>Traag et al. (2019); Good et al. (2010)</td>
+<td>Leiden; degeneracy of modularity</td>
+<td>Leiden, seed and sensitivity reporting</td>
+</tr>
+<tr>
+<td>Guimerà &amp; Amaral (2005)</td>
+<td>Participation coefficient</td>
+<td>Connector score</td>
+</tr>
+<tr>
+<td>Greene et al. (2010)</td>
+<td>Jaccard matching across snapshots</td>
+<td>Link and community persistence</td>
+</tr>
+<tr>
+<td>Shneiderman (1996); Segel &amp; Heer (2010)</td>
+<td>Overview → details; martini-glass stories</td>
+<td>App structure and story mode</td>
+</tr>
+<tr>
+<td>Archambault et al. (2011); Jacomy et al. (2014); Ghoniem et al. (2005)</td>
+<td>Small multiples; layout caveats; dense-graph readability</td>
+<td>Side-by-side periods; layout caption; no hairball as primary map</td>
+</tr>
+<tr>
+<td>Gaffney &amp; Matias (2018); Baumgartner et al. (2020)</td>
+<td>Missing data in Pushshift-derived corpora; provenance</td>
+<td>Counts as lower bounds; provenance statement</td>
+</tr>
+<tr>
+<td>Horta Ribeiro et al. (2021); Phillips &amp; Gorse (2018)</td>
+<td>Text-free event metrics; crypto activity co-moves with price</td>
+<td>Story D metrics and wording</td>
+</tr>
+<tr>
+<td>Ruths &amp; Pfeffer (2014); Proferes et al. (2021)</td>
+<td>Population bias; Reddit research ethics</td>
+<td>Scope wording; aggregate-only publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-data">3. Data</h2>
+<p><strong>Source.</strong> Public Reddit comments from the Arctic Shift archive, a re-packaging of Pushshift dumps hosted on Hugging Face (<code>open-index/arctic</code>), read remotely with DuckDB. Comments in this archive end in August 2022.</p>
+<p><strong>Sampling frame.</strong> 170 subreddits chosen by a fixed rule before any analysis: 25 in each of six topical categories (politics &amp; news, hobby, support, finance, expertise, media) plus 20 front-page "gateway" hubs, each with at least 2,000 comments in every one of three calibration months (<code>frame.csv</code>, <code>FRAME_JUSTIFICATION.md</code>).</p>
+<p><strong>Scope versus proposal.</strong> The proposal planned roughly 150 subreddits over 2019–2025; verification showed comments are only available up to 2022-08, and the window was revised to 2018–2022. This bounded first study processed <strong>12 months, Oct 2017 – Sep 2018 (2017 Q4, 2018 Q1, 2018 Q2, 2018 Q3)</strong>. 2017 Q4 was added to the original three 2018 quarters so the window contains the December 2017 Bitcoin peak. The later years were not collected. All findings describe this sample and window, not Reddit as a whole.</p>
+<p><strong>Collection and cleaning.</strong> Usernames are replaced in the query by a salted SHA-256 hash; no text is kept, only author hash, subreddit, timestamp and a moderator flag. Every fetch asserts that all 170 subreddits are present (coverage: 2017 Q4 complete, 2018 Q1 complete, 2018 Q2 complete, 2018 Q3 complete). Cleaning keeps accounts with at least five comments in a quarter and removes accounts that are both very high-volume (≥ 2,000 comments) and active in at least half the frame (bots).</p>
+<table>
+<thead>
+<tr>
+<th>Quarter</th>
+<th style="text-align: right;">Raw comments</th>
+<th style="text-align: right;">Retained</th>
+<th style="text-align: right;">% kept</th>
+<th>Commenters (raw → kept)</th>
+<th style="text-align: right;">Bot accounts removed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2017 Q4</td>
+<td style="text-align: right;">51,616,108</td>
+<td style="text-align: right;">48,633,963</td>
+<td style="text-align: right;">94.2%</td>
+<td>2,763,494 → 1,144,505</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td>2018 Q1</td>
+<td style="text-align: right;">55,248,128</td>
+<td style="text-align: right;">52,118,250</td>
+<td style="text-align: right;">94.3%</td>
+<td>2,919,421 → 1,215,022</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td>2018 Q2</td>
+<td style="text-align: right;">57,301,138</td>
+<td style="text-align: right;">54,002,756</td>
+<td style="text-align: right;">94.2%</td>
+<td>3,069,238 → 1,279,269</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td>2018 Q3</td>
+<td style="text-align: right;">59,053,604</td>
+<td style="text-align: right;">55,570,837</td>
+<td style="text-align: right;">94.1%</td>
+<td>3,248,860 → 1,339,394</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td style="text-align: right;"><strong>223,218,978</strong></td>
+<td style="text-align: right;"><strong>210,325,806</strong></td>
+<td style="text-align: right;"><strong>94.22%</strong></td>
+<td>2,446,462 distinct kept</td>
+<td style="text-align: right;">15</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-methods">4. Methods</h2>
+<ol>
+<li><strong>Bipartite matrix.</strong> For any period (the whole window, a quarter or a month), a binary matrix records which users commented in which subreddits. Duplicate records are collapsed; this matters, because unsummed duplicates inflate user degrees and break the model.</li>
+<li><strong>Raw overlap (baseline).</strong> Cosine similarity of commenter sets, as in V1.</li>
+<li><strong>Expected overlap.</strong> The BiCM probability <em>p(u, s)</em> that user <em>u</em> comments in subreddit <em>s</em>, fitted so every user keeps their number of subreddits and every subreddit its number of commenters (on average). Users with the same degree share parameters, so the fit has at most a few hundred unknowns. Expected shared commenters: <em>E(a, b) = Σ_u p(u, a) · p(u, b)</em>. <strong>Affinity</strong> = observed shared commenters ÷ <em>E(a, b)</em>.</li>
+<li><strong>Validated ("surprising") links.</strong> One-sided Poisson test of the observed count against <em>E(a, b)</em>, the reference implementation's default approximation, with Benjamini–Hochberg FDR at 1% over all 14,365 pairs.</li>
+<li><strong>Communities and roles.</strong> Leiden (RBConfiguration, γ = 1) on log-affinity weights, best of 20 seeds, on the network pooled over all months. The resulting anchor partition gives stable colours across periods. Participation coefficient and within-community degree (Guimerà &amp; Amaral, 2005) measure connector roles per quarter.</li>
+<li><strong>Change over time.</strong> Jaccard overlap of validated link sets between consecutive months and quarters, used as the "normal churn" baseline. Monthly affinity series for chosen pairs, weekly commenter counts and the share of newcomers.</li>
+<li><strong>Validation.</strong> (a) Unit tests: degree constraints, duplicates, empty communities, structureless data producing no false links, pure popularity producing no hub links, planted communities recovered. (b) Equivalence with the reference <code>bicm</code> package on real data. (c) Exact Poisson-binomial check near the cut-off. (d) A stricter threshold counting only users with ≥ 2 comments in a subreddit. (e) Artifact tests that recompute every story number from the published files.</li>
+</ol>
+<p><strong>Validation results.</strong> On a 150,000-user sample of 2018 Q1, our implementation and <code>bicm</code> v3.4.0 validate the identical set of 952 links (overlap 1.000); fitted probabilities differ by at most 1.1e-08. Exact Poisson-binomial p-values for the 300 pairs nearest the threshold would add 22 links and remove 0 (2.3% of validated links), so the approximation is slightly conservative. Under the stricter threshold, 83% of the whole-window links remain (quarters: 74%, 74%, 77%, 77%), and community assignments agree at ARI 0.933. Of the 108 automated tests, 107 run in the standard environment and pass; the remaining one compares directly against the optional <code>bicm</code> package and passes when it is installed.</p>
+<hr />
+<h2 id="5-results">5. Results</h2>
+<p>Each result is reported as <strong>observed → how measured → what it means → what we cannot conclude</strong>.</p>
+<h3 id="51-what-popularity-hides-rq1">5.1 What popularity hides (RQ1)</h3>
+<ul>
+<li><strong>Observed.</strong> Raw overlap links 99.99% of pairs over the whole window (99.91%, 99.85%, 99.93%, 99.86% per quarter). The ten communities with the largest total raw overlap are all front-page hubs (r/todayilearned, r/pics, r/AskReddit, r/news, r/worldnews, …). Among the ten closest neighbours of each topical subreddit, hubs make up <strong>49%</strong> by raw overlap but <strong>4%</strong> by affinity. Neighbours from the subreddit's own topical category rise from 36% to 66%. The validated network keeps 13.9% of pairs over the whole window, 11.1%, 11.4%, 11.5%, 11.6% per quarter and 7.2%–8.8% per month.</li>
+<li><strong>Example.</strong> r/personalfinance's closest raw neighbours are r/news, r/LifeProTips (hub), r/AskReddit (hub), r/pics (hub), r/todayilearned (hub). Its strongest surprising overlaps are r/financialindependence (2.11×), r/RealEstate (1.94×), r/Insurance (1.78×), r/investing (1.59×), r/Frugal (1.51×). r/AskReddit, with 1,526,775 commenters, has a median affinity of 0.80× with other communities: no more than chance.</li>
+<li><strong>Meaning.</strong> Most of what a raw shared-audience map shows is community size. Controlling for size and user activity recovers topical relationships.</li>
+<li><strong>Cannot conclude.</strong> Affinity measures co-commenting, not friendship, conversation or influence.</li>
+</ul>
+<p><img alt="Raw overlap (left) versus surprising overlap (right)" src="screenshots/02_atlas_raw.png" />
+<img alt="The adjusted Atlas" src="screenshots/03_atlas_adjusted.png" /></p>
+<h3 id="52-communities-and-connectors-rq2">5.2 Communities and connectors (RQ2)</h3>
+<p>The validated network pooled over all months has <strong>9 communities</strong>: weighted modularity 0.577, mean agreement between 20 Leiden seeds ARI 0.995. The communities found in each quarter agree with this anchor partition at ARI 0.887, 0.854, 0.933, 0.903. They largely follow the frame categories (ARI 0.481), with informative exceptions: r/Economics sits with politics, and media subreddits split between the front-page cluster and hobbies.</p>
+<table>
+<thead>
+<tr>
+<th>Community (auto-labelled)</th>
+<th style="text-align: right;">Subreddits</th>
+<th>Largest members</th>
+<th>Category mix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Front page &amp; entertainment</td>
+<td style="text-align: right;">43</td>
+<td>r/AskReddit, r/funny, r/pics, r/todayilearned, r/worldnews</td>
+<td>front 19, media 15, tech, 4, hobbies 3, politics 2</td>
+</tr>
+<tr>
+<td>Hobbies &amp; lifestyle</td>
+<td style="text-align: right;">29</td>
+<td>r/hiphopheads, r/Fitness, r/Frugal, r/cats, r/gardening</td>
+<td>hobbies 17, media 7, tech, 2, support 2, money 1</td>
+</tr>
+<tr>
+<td>Support &amp; health</td>
+<td style="text-align: right;">29</td>
+<td>r/relationship_advice, r/depression, r/offmychest, r/Parenting, r/Anxiety</td>
+<td>support 23, tech, 3, media 1, politics 1, money 1</td>
+</tr>
+<tr>
+<td>Politics &amp; news</td>
+<td style="text-align: right;">25</td>
+<td>r/politics, r/PoliticalHumor, r/conspiracy, r/Libertarian, r/changemyview</td>
+<td>politics 21, tech, 2, money 2</td>
+</tr>
+<tr>
+<td>Money &amp; work</td>
+<td style="text-align: right;">22</td>
+<td>r/personalfinance, r/Bitcoin, r/CryptoCurrency, r/wallstreetbets, r/investing</td>
+<td>money 21, politics 1</td>
+</tr>
+<tr>
+<td>Tech, science &amp; ideas</td>
+<td style="text-align: right;">16</td>
+<td>r/buildapc, r/programming, r/sysadmin, r/learnprogramming, r/linux</td>
+<td>tech, 14, hobbies 2</td>
+</tr>
+<tr>
+<td>magicTCG · boardgames · custommagic</td>
+<td style="text-align: right;">3</td>
+<td>r/magicTCG, r/boardgames, r/custommagic</td>
+<td>hobbies 3</td>
+</tr>
+<tr>
+<td>anime · manga</td>
+<td style="text-align: right;">2</td>
+<td>r/anime, r/manga</td>
+<td>media 2</td>
+</tr>
+<tr>
+<td>RoastMe</td>
+<td style="text-align: right;">1</td>
+<td>r/RoastMe</td>
+<td>front 1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Connectors.</strong> The participation coefficient is 0 when all of a subreddit's surprising links stay inside its own community and approaches 1 when they spread evenly across communities. Among subreddits with at least 8 links, the highest scores in every quarter belong to mid-sized topical communities, not hubs:</p>
+<table>
+<thead>
+<tr>
+<th>Subreddit</th>
+<th>Frame category</th>
+<th style="text-align: right;">Clusters reached</th>
+<th style="text-align: right;">Participation (min over quarters)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>r/Frugal</td>
+<td>Money &amp; work</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0.65</td>
+</tr>
+<tr>
+<td>r/Economics</td>
+<td>Money &amp; work</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.63</td>
+</tr>
+<tr>
+<td>r/askscience</td>
+<td>Tech, science &amp; ideas</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0.60</td>
+</tr>
+<tr>
+<td>r/business</td>
+<td>Money &amp; work</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.59</td>
+</tr>
+<tr>
+<td>r/woodworking</td>
+<td>Hobbies &amp; lifestyle</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.58</td>
+</tr>
+<tr>
+<td>r/NoStupidQuestions</td>
+<td>Front page &amp; entertainment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.57</td>
+</tr>
+<tr>
+<td>r/childfree</td>
+<td>Support &amp; health</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0.56</td>
+</tr>
+<tr>
+<td>r/askphilosophy</td>
+<td>Tech, science &amp; ideas</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.55</td>
+</tr>
+</tbody>
+</table>
+<p>Front-page hubs average 0.25, topical communities 0.31. Connector rankings are stable between quarters (Spearman ρ 0.87, 0.90, 0.94). <em>Cannot conclude:</em> a connector shares unusually many commenters with several clusters; that is not evidence that information flows through it.</p>
+<h3 id="53-unexpected-neighbours-rq2">5.3 Unexpected neighbours (RQ2)</h3>
+<p><strong>218 links</strong> join subreddits from different frame categories, excluding hubs, and are significant in every quarter under both thresholds. The strongest:</p>
+<table>
+<thead>
+<tr>
+<th>Pair</th>
+<th>Categories</th>
+<th style="text-align: right;">Shared (all months)</th>
+<th style="text-align: right;">Expected</th>
+<th style="text-align: right;">Minimum affinity in any quarter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>r/CanadaPolitics – r/PersonalFinanceCanada</td>
+<td>Politics &amp; news × Money &amp; work</td>
+<td style="text-align: right;">1,536</td>
+<td style="text-align: right;">249</td>
+<td style="text-align: right;">7.07×</td>
+</tr>
+<tr>
+<td>r/UKPersonalFinance – r/ukpolitics</td>
+<td>Money &amp; work × Politics &amp; news</td>
+<td style="text-align: right;">2,015</td>
+<td style="text-align: right;">359</td>
+<td style="text-align: right;">6.54×</td>
+</tr>
+<tr>
+<td>r/Economics – r/geopolitics</td>
+<td>Money &amp; work × Politics &amp; news</td>
+<td style="text-align: right;">1,393</td>
+<td style="text-align: right;">281</td>
+<td style="text-align: right;">5.26×</td>
+</tr>
+<tr>
+<td>r/startups – r/webdev</td>
+<td>Money &amp; work × Tech, science &amp; ideas</td>
+<td style="text-align: right;">1,291</td>
+<td style="text-align: right;">303</td>
+<td style="text-align: right;">5.03×</td>
+</tr>
+<tr>
+<td>r/askphilosophy – r/CapitalismVSocialism</td>
+<td>Tech, science &amp; ideas × Politics &amp; news</td>
+<td style="text-align: right;">320</td>
+<td style="text-align: right;">72</td>
+<td style="text-align: right;">4.80×</td>
+</tr>
+<tr>
+<td>r/CapitalismVSocialism – r/Economics</td>
+<td>Politics &amp; news × Money &amp; work</td>
+<td style="text-align: right;">833</td>
+<td style="text-align: right;">211</td>
+<td style="text-align: right;">4.50×</td>
+</tr>
+<tr>
+<td>r/Economics – r/PoliticalDiscussion</td>
+<td>Money &amp; work × Politics &amp; news</td>
+<td style="text-align: right;">2,257</td>
+<td style="text-align: right;">565</td>
+<td style="text-align: right;">4.46×</td>
+</tr>
+<tr>
+<td>r/audioengineering – r/Guitar</td>
+<td>Tech, science &amp; ideas × Hobbies &amp; lifestyle</td>
+<td style="text-align: right;">1,639</td>
+<td style="text-align: right;">411</td>
+<td style="text-align: right;">4.41×</td>
+</tr>
+</tbody>
+</table>
+<p>Two of the three strongest pair a country's politics forum with the same country's personal-finance forum: for these communities, nationality organises audiences more than topic. Links that also cross the detected communities include r/CanadaPolitics – r/PersonalFinanceCanada (≥ 7.07×), r/startups – r/webdev (≥ 5.03×), r/business – r/inthenews (≥ 2.96×), r/nutrition – r/selfimprovement (≥ 2.87×), r/Entrepreneur – r/webdev (≥ 2.79×), r/ChronicPain – r/crochet (≥ 2.71×). <em>Cannot conclude:</em> why audiences overlap. Shared geography, profession or demographics are all possible, and without text we cannot tell them apart.</p>
+<h3 id="54-stability-and-crowds-rq3">5.4 Stability and crowds (RQ3)</h3>
+<p><strong>Stability.</strong> Consecutive quarters share 0.83, 0.82, 0.85 of their validated links (Jaccard); consecutive months share 0.78–0.82. Change smaller than that is normal churn.</p>
+<p><strong>The crypto exodus.</strong> r/Bitcoin's monthly commenters peak in Dec 2017, the month Bitcoin's price peaked (17 Dec 2017). From Dec 2017 to Sep 2018, r/Bitcoin -81%, r/CryptoCurrency -60%, r/ethereum -69%, r/dogecoin -68%, r/BitcoinBeginners -88%, while r/investing changed +1% and the whole frame +14%. Meanwhile the remaining audiences overlapped far more: r/Bitcoin–r/CryptoCurrency affinity was 6.1× in Oct 2017, fell to 3.37× at the peak as newcomers arrived, and rose to <strong>9.8×</strong> by Sep 2018 (9.48× under the stricter threshold).</p>
+<p><strong>The Infinity War crowd.</strong> <em>Avengers: Infinity War</em> opened in the US on 27 April 2018. r/marvelstudios went from a March median of 12,229 weekly commenters to 24,196 in the release week. In April, r/marvelstudios–r/Marvel affinity fell to 3.94× (from 7.42× in January 2018) and recovered to 5.34× by Sep 2018.</p>
+<p><strong>General tendency.</strong> Across all communities, month-to-month audience growth goes with falling affinity to their usual neighbours, and shrinkage with rising affinity, but modestly: Spearman ρ = -0.452 over 128 swings larger than 25% (ρ = -0.111 over all 1,771 month-steps).</p>
+<ul>
+<li><strong>Meaning.</strong> An arriving crowd consists largely of people who comment in only one of the related communities, which dilutes surprising overlap. A departing crowd leaves behind a core that is active across them.</li>
+<li><strong>Cannot conclude.</strong> That the price crash or the film <em>caused</em> these changes. Event dates are external context and the patterns are temporal associations.</li>
+</ul>
+<p><img alt="Crypto and Marvel timelines" src="screenshots/09_story_crowds_timeline.png" /></p>
+<hr />
+<h2 id="6-the-application-the-community-atlas">6. The application: the Community Atlas</h2>
+<p>The Atlas is a static web application (HTML/JavaScript with sigma.js, all libraries bundled) that reads only the aggregate JSON produced by <code>atlas/build_atlas.py</code>. Every view is addressable by URL, so a view can be shared or cited.</p>
+<ul>
+<li><strong>Discoveries:</strong> the question, key numbers, a live raw ↔ adjusted toggle, and the four stories.</li>
+<li><strong>Atlas map:</strong> search; period selector (whole window, quarters, months); raw ↔ adjusted links; colour by detected community or frame category; community filter; hover details; a side panel with the selected subreddit's strongest overlaps (observed vs expected) and what raw overlap would have shown.</li>
+<li><strong>Explore:</strong> a profile for any subreddit: ranked surprising overlaps, raw-vs-adjusted neighbours, weekly commenters, monthly affinity with its strongest neighbours (significant months marked), and its connector role by quarter.</li>
+<li><strong>Compare:</strong> two subreddits (verdict, monthly affinity, per-quarter table, shared neighbours), or two periods (side-by-side maps with appeared and disappeared links, against the churn baseline).</li>
+<li><strong>Stories:</strong> four guided walkthroughs that drive the map, show their evidence and caveats, and end with "keep exploring from here".</li>
+<li><strong>Methods &amp; data:</strong> scope, cleaning, the metric, validation, project evolution, privacy, limitations and downloads (CSV and GEXF for Gephi and Tableau).</li>
+</ul>
+<p>The existing Streamlit dashboard remains as the <strong>Data &amp; Pipeline Console</strong> (coverage, cleaning audit, bot review).</p>
+<p><img alt="Subreddit drawer" src="screenshots/04_atlas_selected.png" />
+<img alt="Comparing two periods" src="screenshots/15_compare_periods.png" /></p>
+<hr />
+<h2 id="7-how-the-project-evolved">7. How the project evolved</h2>
+<ol>
+<li><strong>Proposal.</strong> Test whether bridge positions between communities persist while their occupants change, using a cosine projection, Leiden communities, participation-coefficient brokers and a turnover null model.</li>
+<li><strong>V1 on real data</strong> (tag <code>v1-baseline</code>). The cosine network linked 99.85% of pairs in 2018 Q1. Leiden found 4 communities, so only 6 bridge positions existed, all saturated by thousands of brokers. Pre-registered quality and sample-size gates failed, and all temporal results were labelled descriptive.</li>
+<li><strong>Audit.</strong> V1's reported community quality (Q = -0.0041) was <em>unweighted</em> modularity: leidenalg's <code>.modularity</code> ignores edge weights. The same partitions have weighted modularity 0.1251–0.129 against a shuffled-label maximum near 0 (<code>v1_modularity_audit.json</code>). V1's communities were real but weak; the bridge design was limited by the representation.</li>
+<li><strong>Re-representation.</strong> Literature on bipartite projections pointed to null-model validation (§2). On real data, BiCM-validated links were about 12% dense per quarter, stable over time, and reproduced exactly by the reference implementation.</li>
+<li><strong>Final deliverable.</strong> The Atlas keeps the bridge idea as the connector role and the original temporal interest in the crowd stories. The occupant-turnover hypothesis remains future work: it would need many more bridge positions than V1 could provide, and a properly matched null model.</li>
+</ol>
+<hr />
+<h2 id="8-limitations-and-ethics">8. Limitations and ethics</h2>
+<ul>
+<li><strong>Sample and window.</strong> 170 subreddits and 12 months; overlaps with communities outside the frame are not observed. The frame's "gateway" stratum is large: front-page hubs hold most comments.</li>
+<li><strong>Commenters only.</strong> Lurkers and voters are invisible. Comments deleted before archiving are missing, and Pushshift ingestion had outages (Gaffney &amp; Matias, 2018), so counts are lower bounds.</li>
+<li><strong>No text.</strong> Co-commenting is not conversation or influence; motives and topics cannot be inferred.</li>
+<li><strong>Statistical choices.</strong> The test approximates the Poisson-binomial (slightly conservative); the FDR level and the activity threshold change details. The number of communities depends on thresholds (ARI 0.933 under the stricter one).</li>
+<li><strong>Events.</strong> Associations, not causal effects.</li>
+<li><strong>Labels.</strong> Frame categories come from a keyword rule and can be wrong. The network suggests r/smoking (labelled “Support &amp; health”) is a smoked-food community: its strongest overlaps are r/Cooking, r/newsokunomoral, r/woodworking, and it peaks in Jul 2018.</li>
+<li><strong>Ethics and privacy.</strong> Data are public. Usernames are salted and hashed at collection, and the salt is never committed. Only subreddit-level aggregates are published, which an automated test checks. Mental-health communities appear only as aggregates. Earlier commits of this repository contain a bot-review file of 200 hashed account IDs from a prototype run; it is now untracked and ignored, and purging it from the remote history is recommended.</li>
+</ul>
+<hr />
+<h2 id="9-conclusion">9. Conclusion</h2>
+<p>Raw shared-audience networks mostly measure size. Once size and user activity are accounted for, about one in seven subreddit pairs in our sample shares a surprisingly large audience. Those links form stable topical communities, reveal cross-topic neighbours (a nation's politics and personal-finance forums) and connector communities (r/Frugal, r/Economics, r/askscience), and respond to crowds arriving and leaving. The Community Atlas lets an evaluator verify each of these claims interactively. <strong>Future work:</strong> extend the window to 2019–2022 with the same pipeline; revisit bridge-occupant turnover with link-level bridge positions; add a reply-network layer (<code>parent_id</code> is available in the source) to separate co-presence from conversation.</p>
+<hr />
+<h2 id="references">References</h2>
+<ul>
+<li>Archambault, D., Purchase, H. C., &amp; Pinaud, B. (2011). Animation, small multiples, and the effect of mental map preservation in dynamic graphs. <em>IEEE Transactions on Visualization and Computer Graphics, 17</em>(4), 539–552. https://doi.org/10.1109/TVCG.2010.78</li>
+<li>Baumgartner, J., Zannettou, S., Keegan, B., Squire, M., &amp; Blackburn, J. (2020). The Pushshift Reddit dataset. <em>Proceedings of ICWSM, 14</em>, 830–839. https://doi.org/10.1609/icwsm.v14i1.7347</li>
+<li>Becatti, C., Caldarelli, G., Lambiotte, R., &amp; Saracco, F. (2019). Extracting significant signal of news consumption from social networks: the case of Twitter in Italian political elections. <em>Palgrave Communications, 5</em>, 91. https://doi.org/10.1057/s41599-019-0300-3</li>
+<li>Caldarelli, G., De Nicola, R., Del Vigna, F., Petrocchi, M., &amp; Saracco, F. (2020). The role of bot squads in the political propaganda on Twitter. <em>Communications Physics, 3</em>, 81. https://doi.org/10.1038/s42005-020-0340-4</li>
+<li>Cimini, G., Carra, A., Didomenicantonio, L., &amp; Zaccaria, A. (2022). Meta-validation of bipartite network projections. <em>Communications Physics, 5</em>, 76. https://doi.org/10.1038/s42005-022-00856-9</li>
+<li>Coscia, M., &amp; Rossi, L. (2019). The impact of projection and backboning on network topologies. <em>arXiv:1906.09081</em> (preprint).</li>
+<li>Gaffney, D., &amp; Matias, J. N. (2018). Caveat emptor, computational social science: Large-scale missing data in a widely-published Reddit corpus. <em>PLoS ONE, 13</em>(7), e0200162. https://doi.org/10.1371/journal.pone.0200162</li>
+<li>Ghoniem, M., Fekete, J.-D., &amp; Castagliola, P. (2005). On the readability of graphs using node-link and matrix-based representations. <em>Information Visualization, 4</em>(2), 114–135. https://doi.org/10.1057/palgrave.ivs.9500092</li>
+<li>Good, B. H., de Montjoye, Y.-A., &amp; Clauset, A. (2010). Performance of modularity maximization in practical contexts. <em>Physical Review E, 81</em>, 046106. https://doi.org/10.1103/PhysRevE.81.046106</li>
+<li>Greene, D., Doyle, D., &amp; Cunningham, P. (2010). Tracking the evolution of communities in dynamic social networks. <em>Proceedings of ASONAM 2010</em>, 176–183. https://doi.org/10.1109/ASONAM.2010.17</li>
+<li>Guimerà, R., &amp; Amaral, L. A. N. (2005). Functional cartography of complex metabolic networks. <em>Nature, 433</em>, 895–900. https://doi.org/10.1038/nature03288</li>
+<li>Horta Ribeiro, M., Jhaver, S., Zannettou, S., Blackburn, J., Stringhini, G., De Cristofaro, E., &amp; West, R. (2021). Do platform migrations compromise content moderation? Evidence from r/The_Donald and r/Incels. <em>Proceedings of the ACM on Human-Computer Interaction, 5</em>(CSCW2). https://doi.org/10.1145/3476057</li>
+<li>Jacomy, M., Venturini, T., Heymann, S., &amp; Bastian, M. (2014). ForceAtlas2, a continuous graph layout algorithm for handy network visualization designed for the Gephi software. <em>PLoS ONE, 9</em>(6), e98679. https://doi.org/10.1371/journal.pone.0098679</li>
+<li>Larremore, D. B., Clauset, A., &amp; Jacobs, A. Z. (2014). Efficiently inferring community structure in bipartite networks. <em>Physical Review E, 90</em>, 012805. https://doi.org/10.1103/PhysRevE.90.012805</li>
+<li>Neal, Z. P., Domagalski, R., &amp; Sagan, B. (2021). Comparing alternatives to the fixed degree sequence model for extracting the backbone of bipartite projections. <em>Scientific Reports, 11</em>, 23929. https://doi.org/10.1038/s41598-021-03238-3</li>
+<li>Olson, R. S., &amp; Neal, Z. P. (2015). Navigating the massive world of reddit: Using backbone networks to map user interests in social media. <em>PeerJ Computer Science, 1</em>, e4. https://doi.org/10.7717/peerj-cs.4</li>
+<li>Phillips, R. C., &amp; Gorse, D. (2018). Cryptocurrency price drivers: Wavelet coherence analysis revisited. <em>PLoS ONE, 13</em>(4), e0195200. https://doi.org/10.1371/journal.pone.0195200</li>
+<li>Proferes, N., Jones, N., Gilbert, S., Fiesler, C., &amp; Zimmer, M. (2021). Studying Reddit: A systematic overview of disciplines, approaches, methods, and ethics. <em>Social Media + Society, 7</em>(2). https://doi.org/10.1177/20563051211019004</li>
+<li>Ruths, D., &amp; Pfeffer, J. (2014). Social media for large studies of behavior. <em>Science, 346</em>(6213), 1063–1064. https://doi.org/10.1126/science.346.6213.1063</li>
+<li>Saracco, F., Di Clemente, R., Gabrielli, A., &amp; Squartini, T. (2015). Randomizing bipartite networks: the case of the World Trade Web. <em>Scientific Reports, 5</em>, 10595. https://doi.org/10.1038/srep10595</li>
+<li>Saracco, F., Straka, M. J., Di Clemente, R., Gabrielli, A., Caldarelli, G., &amp; Squartini, T. (2017). Inferring monopartite projections of bipartite networks: an entropy-based approach. <em>New Journal of Physics, 19</em>, 053022. https://doi.org/10.1088/1367-2630/aa6b38</li>
+<li>Segel, E., &amp; Heer, J. (2010). Narrative visualization: Telling stories with data. <em>IEEE Transactions on Visualization and Computer Graphics, 16</em>(6), 1139–1148. https://doi.org/10.1109/TVCG.2010.179</li>
+<li>Serrano, M. Á., Boguñá, M., &amp; Vespignani, A. (2009). Extracting the multiscale backbone of complex weighted networks. <em>PNAS, 106</em>(16), 6483–6488. https://doi.org/10.1073/pnas.0808904106</li>
+<li>Shneiderman, B. (1996). The eyes have it: A task by data type taxonomy for information visualizations. <em>Proceedings of the IEEE Symposium on Visual Languages</em>, 336–343. https://doi.org/10.1109/VL.1996.545307</li>
+<li>Traag, V. A., Waltman, L., &amp; van Eck, N. J. (2019). From Louvain to Leiden: guaranteeing well-connected communities. <em>Scientific Reports, 9</em>, 5233. https://doi.org/10.1038/s41598-019-41695-z</li>
+<li>Vallarano, N., Bruno, M., Marchese, E., Trapani, G., Saracco, F., Cimini, G., Zanon, M., &amp; Squartini, T. (2021). Fast and scalable likelihood maximization for exponential random graph models with local constraints. <em>Scientific Reports, 11</em>. https://doi.org/10.1038/s41598-021-93830-4</li>
+<li>Waller, I., &amp; Anderson, A. (2021). Quantifying social organization and political polarization in online platforms. <em>Nature, 600</em>, 264–268. https://doi.org/10.1038/s41586-021-04167-x</li>
+</ul>
+<hr />
+<h2 id="appendix-a-where-each-headline-number-comes-from">Appendix A: where each headline number comes from</h2>
+<table>
+<thead>
+<tr>
+<th>Claim</th>
+<th>Value</th>
+<th>Artifact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Raw comments / retained</td>
+<td>223,218,978 / 210,325,806</td>
+<td><code>data_curation/data/logs/cleaning_report.csv</code></td>
+</tr>
+<tr>
+<td>Distinct commenters</td>
+<td>2,446,462</td>
+<td><code>atlas/web/data/meta.json</code> → <code>summary.users_total</code></td>
+</tr>
+<tr>
+<td>Raw-overlap density (all months)</td>
+<td>99.99%</td>
+<td><code>meta.json</code> → <code>summary.cosine_density.all</code></td>
+</tr>
+<tr>
+<td>Validated density (all months / quarters)</td>
+<td>13.9% / 11.1%, 11.4%, 11.5%, 11.6%</td>
+<td><code>meta.json</code> → <code>summary.validated_density</code></td>
+</tr>
+<tr>
+<td>Communities, weighted Q, seed ARI</td>
+<td>9, 0.577, 0.995</td>
+<td><code>meta.json</code> → <code>summary.anchor</code></td>
+</tr>
+<tr>
+<td>Hub share of top-10 neighbours (raw / adjusted)</td>
+<td>49% / 4%</td>
+<td><code>stories.json</code> → <code>popularity.metrics</code></td>
+</tr>
+<tr>
+<td>Robust cross-category links</td>
+<td>218</td>
+<td><code>stories.json</code> → <code>neighbours.metrics</code></td>
+</tr>
+<tr>
+<td>Top connector participation</td>
+<td>r/Frugal 0.65</td>
+<td><code>stories.json</code> → <code>connectors.metrics</code>; <code>nodes.json</code></td>
+</tr>
+<tr>
+<td>r/Bitcoin–r/CryptoCurrency affinity (Oct 2017 / Dec 2017 / Sep 2018)</td>
+<td>6.1 / 3.37 / 9.8</td>
+<td><code>stories.json</code> → <code>crowds.metrics.crypto_pair_affinity</code>; recomputed by <code>tests/test_atlas_artifacts.py</code></td>
+</tr>
+<tr>
+<td>Quarter-to-quarter link Jaccard</td>
+<td>0.835, 0.825, 0.852</td>
+<td><code>meta.json</code> → <code>summary.quarter_edge_jaccard</code></td>
+</tr>
+<tr>
+<td>Reference cross-check</td>
+<td>952 = 952 links</td>
+<td><code>atlas/validation/bicm_crosscheck.json</code></td>
+</tr>
+<tr>
+<td>V1 stored vs weighted Q (2018 Q1)</td>
+<td>-0.0041 vs 0.1251</td>
+<td><code>data_curation/data/logs/v1_modularity_audit.json</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="appendix-b-reproducing-everything">Appendix B: reproducing everything</h2>
+<pre><code class="language-bash">pip install -r requirements.txt
+python data_curation/run_pipeline.py --start 2017 10 --end 2018 9   # fetch + clean (needs a local salt; see README)
+python atlas/build_atlas.py                                          # all Atlas data, stories and exports (~6–8 min)
+python -m pytest tests/                                              # 108 tests (1 needs the optional bicm package)
+python atlas/serve.py                                                # open the Atlas
+python tools/build_docs.py --pdf                                     # this report
+</code></pre>
+<p><em>Report generated 2026-10-28 from build 2026-10-28T00:20:39+00:00 (commit 7ccac45).</em></p></body></html>

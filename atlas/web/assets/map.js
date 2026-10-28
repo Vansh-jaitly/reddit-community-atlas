@@ -100,7 +100,7 @@ export class AtlasMap {
         const [i, j] = pairEnds(k);
         const w = p.cosine[k] / cmax;
         this.graph.addEdgeWithKey(`${i}-${j}`, String(i), String(j), {
-          size: 0.2 + 1.2 * w, color: mix([200, 199, 190], 0.05 + 0.3 * w), k, base: true,
+          size: 0.2 + 1.2 * w, color: mix([200, 199, 190], 0.12 + 0.5 * w), k, base: true,
         });
       }
     } else {

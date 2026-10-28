@@ -1,0 +1,7 @@
+{
+  "name": "atlas-deck",
+  "private": true,
+  "description": "Builds docs/presentation/Community_Atlas.pptx from the Atlas artifacts",
+  "scripts": { "build": "node build_deck.js" },
+  "dependencies": { "pptxgenjs": "3.12.0" }
+}
