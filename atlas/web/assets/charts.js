@@ -8,7 +8,8 @@ import { showTip, hideTip, esc } from "./core.js";
  */
 export function lineChart(el, cfg) {
   const direct = cfg.directLabels !== false && cfg.series.length <= 4;
-  const W = Math.max(320, Math.round(el.clientWidth || 640)), H = cfg.height || 260, m = { t: 14, r: direct ? 118 : 16, b: 28, l: 52 };
+  const longest = direct ? Math.min(24, Math.max(...cfg.series.map((s) => s.name.length))) : 0;
+  const W = Math.max(320, Math.round(el.clientWidth || 640)), H = cfg.height || 260, m = { t: 14, r: direct ? Math.round(12 + 6.4 * longest) : 16, b: 28, l: 52 };
   const fmt = cfg.format || ((v) => v.toLocaleString("en-US"));
   const all = cfg.series.flatMap((s) => s.values).filter((v) => v != null && isFinite(v));
   if (!all.length) { el.innerHTML = `<div class="empty">No data for this selection.</div>`; return; }
@@ -47,7 +48,7 @@ export function lineChart(el, cfg) {
     <g class="event">${evs.map((e, k) => `<line x1="${x(e.i)}" x2="${x(e.i)}" y1="${m.t}" y2="${H - m.b}"/><text x="${x(e.i) + 4}" y="${m.t + 10 + 13 * (k % 2)}">${esc(e.short ?? e.label)}</text>`).join("")}</g>
     <g class="series">${cfg.series.map((s) => `<path d="${path(s.values)}" stroke="${s.color}" ${s.dashed ? 'stroke-dasharray="5 4"' : ""}/>
       ${s.points ? s.values.map((v, i) => v == null ? "" : `<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="${s.points[i] ? s.color : "var(--surface-1)"}" stroke="${s.color}" stroke-width="2"/>`).join("") : ""}`).join("")}</g>
-    <g class="axis">${ends.map((e) => `<text x="${W - m.r + 8}" y="${e.yy + 4}" style="fill:var(--text-secondary)">${esc(trunc(e.s.name, 16))}</text>`).join("")}</g>
+    <g class="axis">${ends.map((e) => `<text x="${W - m.r + 8}" y="${e.yy + 4}" style="fill:var(--text-secondary)">${esc(trunc(e.s.name, 24))}</text>`).join("")}</g>
     <g class="cross" visibility="hidden"><line y1="${m.t}" y2="${H - m.b}"/></g>
     <rect x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/>
   </svg>
@@ -92,3 +93,17 @@ export const monthTick = (m, long) => {
   const d = new Date(Date.UTC(yy, mm - 1, mm && m.length > 7 ? Number(m.slice(8)) : 1));
   return d.toLocaleDateString("en-GB", long ? { day: m.length > 7 ? "numeric" : undefined, month: "short", year: "numeric", timeZone: "UTC" } : { month: "short", ...(m.length > 7 ? { day: "numeric" } : {}), timeZone: "UTC" });
 };
+
+/**
+ * Horizontal bar chart. rows: [{label, value, color?, note?}], format(v) for the value label.
+ */
+export function barChart(el, { rows, format = (v) => v.toLocaleString("en-US"), max = null, ariaLabel = "bar chart" }) {
+  const vmax = max || Math.max(...rows.map((r) => r.value), 1);
+  el.classList.add("chart");
+  el.innerHTML = `<div class="hbars" role="img" aria-label="${esc(ariaLabel)}">${rows.map((r) => `
+    <div class="hbar-row">
+      <span class="hbar-label">${esc(r.label)}</span>
+      <span class="hbar-track"><span class="hbar-fill" style="width:${Math.max(1, (100 * r.value) / vmax).toFixed(1)}%;background:${r.color || "var(--accent)"}"></span></span>
+      <span class="hbar-val">${esc(format(r.value))}${r.note ? `<small> ${esc(r.note)}</small>` : ""}</span>
+    </div>`).join("")}</div>`;
+}

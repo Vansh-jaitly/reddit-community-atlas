@@ -1,7 +1,7 @@
 # HANDOFF PROMPT FOR CLAUDE — paste everything below this line into Claude
 # (Claude will also have full access to the repository folder.)
 
-You are taking over the project in this repository (`C:\Users\vansh\Desktop\CSMA\sm`).
+You are taking over the project in this repository (`<repo>`).
 Read this entire brief first. It is authoritative. Do not redo completed work.
 
 ## 1. WHAT THIS IS

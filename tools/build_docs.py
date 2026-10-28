@@ -20,9 +20,11 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "atlas/web/data"
 DOCS = ROOT / "docs"
 
-meta = json.loads((DATA / "meta.json").read_text())
-stories = {s["id"]: s for s in json.loads((DATA / "stories.json").read_text())["stories"]}
-validity = json.loads((DATA / "stories.json").read_text())["validity_notes"]
+meta = json.loads((DATA / "meta.json").read_text(encoding="utf-8"))
+_stories_file = json.loads((DATA / "stories.json").read_text(encoding="utf-8"))
+stories = {s["id"]: s for s in _stories_file["stories"]}
+validity = _stories_file["validity_notes"]
+label_mismatch = _stories_file.get("label_mismatch")
 S = meta["summary"]
 CC = meta["validation"]["bicm_crosscheck"]
 V1 = meta["validation"]["v1_modularity_audit"]
@@ -55,21 +57,40 @@ months = S["months"]
 qj = S["quarter_edge_jaccard"]
 mj = S["month_edge_jaccard"]
 cp_key = next(iter(Dm["crypto_pair_affinity"]))
+fmtx = lambda v: f"{v:.1f}×"
+pl_json = json.loads((DATA / "pipeline.json").read_text(encoding="utf-8")) if (DATA / "pipeline.json").exists() else None
+pl_tests = len(pl_json["tests"]) if pl_json else 112
+lead_big = next((e for e in (pl_json["examples"] if pl_json else []) if e["a"] == Am["biggest"]), {"shared": 0})
 cp = Dm["crypto_pair_affinity"][cp_key]
 cp2 = Dm["crypto_pair_affinity_min2"][cp_key]
 mk = next(iter(Dm["marvel_pair_affinity"]))
 mv = Dm["marvel_pair_affinity"][mk]
 mi = {m: i for i, m in enumerate(months)}
 base = Dm["baseline_month"]
-gt = Dm["general_tendency"]
+gt = Dm["tendency"]
 crypto_names = list(Dm["crypto_monthly_authors"])
+sw = Dm.get("starwars")
+mvl = Dm["marvel"]
+rate_ab, rate_ba, cos_m = Dm["crypto_cross_rate_ab"], Dm["crypto_cross_rate_ba"], Dm["crypto_pair_cosine"]
+anc = S["anchor"]
+comm_phrase = (f"{anc['communities_major']} major communities (plus {anc['small_groups']} small groups and {anc['isolates']} isolate{'s' if anc['isolates'] != 1 else ''})"
+               if "communities_major" in anc else f"{anc['communities']} communities")
+giant = Am["giant_pair"]
+country = Bm["country"]
+ideo = Bm["ideology"]
+iso = Bm["isolation"][0]
+hub_conn = [c["name"] for c in Cm["connectors"][:8] if c["gateway"]]
+gi = Cm["giants"]
+ctrl = country["same_topic_across_border"][0]
+pair_status = lambda u: "surprising but small" if u["validated"] else ("fewer than chance" if u["avoided"] else ("below expectation" if u["affinity"] < 0.9 else "within chance"))
+avoided_pairs = pl_json["stages"]["validated"]["avoided_pairs"] if pl_json else None
 vig = validity[0] if validity else None
 
 
 def community_table():
     rows = ["| Community (auto-labelled) | Subreddits | Largest members | Category mix |", "|---|---:|---|---|"]
     for c in meta["communities"]:
-        mix = ", ".join(f"{CAT[k].split(' ')[0].lower()} {v}" for k, v in c["category_mix"].items())
+        mix = ", ".join(f"{CAT[k].split(' ')[0].rstrip(',').lower()} {v}" for k, v in c["category_mix"].items())
         rows.append(f"| {c['label']} | {c['size']} | {', '.join('r/' + x for x in c['members'][:5])} | {mix} |")
     return "\n".join(rows)
 
@@ -85,6 +106,31 @@ def connectors_table():
     out = ["| Subreddit | Frame category | Clusters reached | Participation (min over quarters) |", "|---|---|---:|---:|"]
     for c in Cm["connectors"][:8]:
         out.append(f"| r/{c['name']} | {CAT[c['category']]} | {c['communities_reached']} | {c['participation_min']:.2f} |")
+    return "\n".join(out)
+
+
+def country_table():
+    out = ["| Pair | Relation | Shared | Expected | Affinity | Status |", "|---|---|---:|---:|---:|---|"]
+    rows = [(x, "same country, different topic") for x in country["same_country"]] + \
+           [(x, "same topic, across the border (control)") for x in country["same_topic_across_border"]] + \
+           [(x, "national forum vs the US-default forum") for x in country["to_us_default"]]
+    for x, rel in rows:
+        status = "surprising" if x["validated"] else ("fewer than chance" if x["avoided"] else "within chance")
+        out.append(f"| r/{x['a']} – r/{x['b']} | {rel} | {n(x['shared'])} | {n(x['expected'])} | {x['affinity']:.2f}× | {status} ({x['validated_periods']} of {country['periods']} periods significant) |")
+    return "\n".join(out)
+
+
+def outward_table():
+    out = ["| Cluster | Subreddits | Links inside / outward | Share leaving | vs degree-preserving rewiring |", "|---|---:|---|---:|---:|"]
+    for o in Cm["outward"]:
+        out.append(f"| {o['community']} | {o['members']} | {n(o['links_inside'])} / {n(o['links_outward'])} | {pct(o['outward_share'], 0)} | {o['outward_vs_expected']:.2f}× |")
+    return "\n".join(out)
+
+
+def apart_table():
+    out = ["| Pair | Shared | Expected | Affinity | Quarters below half of expectation |", "|---|---:|---:|---:|---:|"]
+    for x in Bm["lowest_pairs"][:6]:
+        out.append(f"| r/{x['a']} – r/{x['b']} | {n(x['shared'])} | {n(x['expected'])} | {x['affinity']:.3f}× | {x['quarters_below_half']} of {len(Q)} |")
     return "\n".join(out)
 
 
@@ -106,6 +152,7 @@ def ex_lists():
 
 raw_list, adj_list = ex_lists()
 cross = Bm["top_cross_community_links"]
+lead = Bm["top_links"][0]
 
 REPORT = f"""---
 title: "Beyond the Hairball: The Reddit Community Atlas"
@@ -125,7 +172,7 @@ Team: Akashita (230779), Vansh Jaitly (230687) · see `docs/CONTRIBUTION_MATRIX.
 
 ## Abstract
 
-Online communities are often mapped through the audiences they share, but raw shared-audience networks mostly measure size: one person who comments in many places links all of them, and the biggest communities look close to everything. We collected {n(tot_raw)} public Reddit comments from a fixed, rule-based frame of {S['subreddits']} subreddits over {len(months)} months ({mlabel(months[0])} – {mlabel(months[-1])}), cleaned them to {n(tot_clean)} comments by {n(S['users_total'])} pseudonymised commenters, and built a user × subreddit network. The conventional cosine projection links {pct(S['cosine_density']['all'], 2)} of all subreddit pairs. Comparing each pair's shared commenters with the number expected from community size and user activity alone (the Bipartite Configuration Model, BiCM) and keeping only pairs that exceed it at a 1% false discovery rate leaves {pct(S['validated_density']['all'])} of pairs. That network has a clear, reproducible structure: {S['anchor']['communities']} communities (weighted modularity {S['anchor']['weighted_modularity']}, seed agreement ARI {S['anchor']['seed_ari']}), stable connector roles, and {pct(min(qj.values()), 0)}–{pct(max(qj.values()), 0)} of links recurring between consecutive quarters. We built the results into an interactive web application, the Community Atlas, with four guided stories: what popularity hides, unexpected neighbours, hidden connectors, and how community ties respond when crowds arrive and leave. The project started as a test of whether cross-community "bridge positions" outlast their occupants. It evolved after the first, cosine-based pipeline proved too dense to measure bridges at all. The findings are descriptive and specific to this sample.
+Online communities are often mapped through the audiences they share, but raw shared-audience networks mostly measure size: one person who comments in many places links all of them, and the biggest communities look close to everything. We collected {n(tot_raw)} public Reddit comments from a fixed, rule-based frame of {S['subreddits']} subreddits over {len(months)} months ({mlabel(months[0])} – {mlabel(months[-1])}), cleaned them to {n(tot_clean)} comments by {n(S['users_total'])} pseudonymised commenters, and built a user × subreddit network. The conventional cosine projection links {pct(S['cosine_density']['all'], 2)} of all subreddit pairs. Comparing each pair's shared commenters with the number expected from community size and user activity alone (the Bipartite Configuration Model, BiCM) and keeping only pairs that exceed it at a 1% false discovery rate leaves {pct(S['validated_density']['all'])} of pairs. That network has a clear, reproducible structure: {comm_phrase} (weighted modularity {S['anchor']['weighted_modularity']}, seed agreement ARI {S['anchor']['seed_ari']}), stable connector roles, and a Jaccard overlap of {min(qj.values()):.2f}–{max(qj.values()):.2f} between consecutive quarters' link sets (about {100 * 2 * min(qj.values()) / (1 + min(qj.values())):.0f}% of a quarter's links recur). We built the results into an interactive web application, the Community Atlas, with four guided discoveries: what popularity hides, neighbours and strangers (the same test also marks pairs that share *fewer* commenters than chance), connectors and sealed clusters, and what changes — and what only appears to — when crowds arrive and leave. The project started as a test of whether cross-community "bridge positions" outlast their occupants. It evolved after the first, cosine-based pipeline proved too dense to measure bridges at all. The findings are descriptive and specific to this sample.
 
 ---
 
@@ -194,12 +241,12 @@ The deliverable is an end-to-end, reproducible pipeline and an interactive appli
 1. **Bipartite matrix.** For any period (the whole window, a quarter or a month), a binary matrix records which users commented in which subreddits. Duplicate records are collapsed; this matters, because unsummed duplicates inflate user degrees and break the model.
 2. **Raw overlap (baseline).** Cosine similarity of commenter sets, as in V1.
 3. **Expected overlap.** The BiCM probability *p(u, s)* that user *u* comments in subreddit *s*, fitted so every user keeps their number of subreddits and every subreddit its number of commenters (on average). Users with the same degree share parameters, so the fit has at most a few hundred unknowns. Expected shared commenters: *E(a, b) = Σ_u p(u, a) · p(u, b)*. **Affinity** = observed shared commenters ÷ *E(a, b)*.
-4. **Validated ("surprising") links.** One-sided Poisson test of the observed count against *E(a, b)*, the reference implementation's default approximation, with Benjamini–Hochberg FDR at {pct(S['alpha'], 0)} over all {n(S['subreddits'] * (S['subreddits'] - 1) / 2)} pairs.
+4. **Validated ("surprising") links.** One-sided Poisson test of the observed count against *E(a, b)*, the reference implementation's default approximation, with Benjamini–Hochberg FDR at {pct(S['alpha'], 0)} over all {n(S['subreddits'] * (S['subreddits'] - 1) / 2)} pairs. The lower tail is tested the same way: a pair is marked as sharing *fewer* commenters than chance when its lower-tail test passes the same FDR and, as an effect-size floor, it shares at most half of its expected overlap with at least 20 expected (the "avoided" rule).
 5. **Communities and roles.** Leiden (RBConfiguration, γ = 1) on log-affinity weights, best of 20 seeds, on the network pooled over all months. The resulting anchor partition gives stable colours across periods. Participation coefficient and within-community degree (Guimerà & Amaral, 2005) measure connector roles per quarter.
 6. **Change over time.** Jaccard overlap of validated link sets between consecutive months and quarters, used as the "normal churn" baseline. Monthly affinity series for chosen pairs, weekly commenter counts and the share of newcomers.
 7. **Validation.** (a) Unit tests: degree constraints, duplicates, empty communities, structureless data producing no false links, pure popularity producing no hub links, planted communities recovered. (b) Equivalence with the reference `bicm` package on real data. (c) Exact Poisson-binomial check near the cut-off. (d) A stricter threshold counting only users with ≥ {S['sensitivity_min_comments']} comments in a subreddit. (e) Artifact tests that recompute every story number from the published files.
 
-**Validation results.** On a {n(CC['sample_users'])}-user sample of {qlabel(CC['quarter'])}, our implementation and `bicm` v{CC['bicm_version']} validate the identical set of {n(CC['validated_ours'])} links (overlap {CC['validated_jaccard']:.3f}); fitted probabilities differ by at most {CC['fit_max_abs_prob_difference']:.1e}. Exact Poisson-binomial p-values for the {CC['exact_poisson_binomial_pairs_checked']} pairs nearest the threshold would add {CC['exact_flips_gained']} links and remove {CC['exact_flips_lost']} ({pct(CC['exact_flips_share_of_validated'])} of validated links), so the approximation is slightly conservative. Under the stricter threshold, {pct(S['robust_share']['all'], 0)} of the whole-window links remain (quarters: {', '.join(pct(S['robust_share'][q], 0) for q in Q)}), and community assignments agree at ARI {S['anchor']['sensitivity_ari']}. Of the 108 automated tests, 107 run in the standard environment and pass; the remaining one compares directly against the optional `bicm` package and passes when it is installed.
+**Validation results.** On a {n(CC['sample_users'])}-user sample of {qlabel(CC['quarter'])}, our implementation and `bicm` v{CC['bicm_version']} validate the identical set of {n(CC['validated_ours'])} links (overlap {CC['validated_jaccard']:.3f}); fitted probabilities differ by at most {CC['fit_max_abs_prob_difference']:.1e}. Exact Poisson-binomial p-values for the {CC['exact_poisson_binomial_pairs_checked']} pairs nearest the threshold would add {CC['exact_flips_gained']} links and remove {CC['exact_flips_lost']} ({pct(CC['exact_flips_share_of_validated'])} of validated links), so the approximation is slightly conservative. Under the stricter threshold, {pct(S['robust_share']['all'], 0)} of the whole-window links remain (quarters: {', '.join(pct(S['robust_share'][q], 0) for q in Q)}), and community assignments agree at ARI {S['anchor']['sensitivity_ari']}. Of the {pl_tests} automated tests, {pl_tests - 1} run in the standard environment and pass; the remaining one compares directly against the optional `bicm` package and passes when it is installed.
 
 ---
 
@@ -209,64 +256,91 @@ Each result is reported as **observed → how measured → what it means → wha
 
 ### 5.1 What popularity hides (RQ1)
 
-- **Observed.** Raw overlap links {pct(S['cosine_density']['all'], 2)} of pairs over the whole window ({', '.join(pct(S['cosine_density'][q], 2) for q in Q)} per quarter). The ten communities with the largest total raw overlap are all front-page hubs ({', '.join('r/' + x for x in Am['top_by_cosine_strength'][:5])}, …). Among the ten closest neighbours of each topical subreddit, hubs make up **{pct(Am['hub_share_cosine'], 0)}** by raw overlap but **{pct(Am['hub_share_affinity'], 0)}** by affinity. Neighbours from the subreddit's own topical category rise from {pct(Am['same_category_cosine'], 0)} to {pct(Am['same_category_affinity'], 0)}. The validated network keeps {pct(S['validated_density']['all'])} of pairs over the whole window, {', '.join(pct(S['validated_density'][q]) for q in Q)} per quarter and {pct(min(S['validated_density'][m] for m in months))}–{pct(max(S['validated_density'][m] for m in months))} per month.
-- **Example.** r/{Am['example']}'s closest raw neighbours are {raw_list}. Its strongest surprising overlaps are {adj_list}. r/{Am['biggest']}, with {n(Am['biggest_users'])} commenters, has a median affinity of {Am['biggest_median_affinity']:.2f}× with other communities: no more than chance.
+- **Observed.** Raw overlap links {pct(S['cosine_density']['all'], 2)} of pairs over the whole window ({', '.join(pct(S['cosine_density'][q], 2) for q in Q)} per quarter). {Am['hubs_in_top10']} of the ten communities with the largest total raw overlap are front-page hubs, and all ten sit in the front-page cluster ({', '.join('r/' + x for x in Am['top_by_cosine_strength'][:5])}, …). Among the ten closest neighbours of each topical subreddit, hubs make up **{pct(Am['hub_share_cosine'], 0)}** by raw overlap but **{pct(Am['hub_share_affinity'], 0)}** by affinity. Neighbours from the subreddit's own topical category rise from {pct(Am['same_category_cosine'], 0)} to {pct(Am['same_category_affinity'], 0)}. The validated network keeps {pct(S['validated_density']['all'])} of pairs over the whole window, {', '.join(pct(S['validated_density'][q]) for q in Q)} per quarter and {pct(min(S['validated_density'][m] for m in months))}–{pct(max(S['validated_density'][m] for m in months))} per month.
+- **Example.** r/{Am['example']}'s closest raw neighbours are {raw_list}. Its strongest surprising overlaps are {adj_list}. r/{giant['a']} and r/{giant['b']} share {n(giant['shared'])} commenters, the largest shared audience of any pair that is never a surprising link, where {n(giant['expected'])} were expected ({giant['affinity']:.2f}×): in none of the {giant['periods_tested']} periods tested is it a surprising link. r/{Am['biggest']} ({n(Am['biggest_users'])} commenters, {pct(Am['biggest_share_of_commenters'], 0)} of everyone in the frame) has a median affinity of {Am['biggest_median_affinity']:.2f}× and falls short of expectation with {Am['biggest_below_expectation_partners']} of the other {S['subreddits'] - 1} communities; for a community that large the expected overlap is close to the maximum possible, so its affinity is bounded near {Am['biggest_affinity_ceiling_median']:.1f}× by construction. For {Am['zero_overlap_count']} of {S['subreddits']} subreddits (for example {', '.join('r/' + x for x in Am['zero_overlap_examples'][:3])}) the five closest neighbours by raw overlap and by affinity share no name at all.
 - **Meaning.** Most of what a raw shared-audience map shows is community size. Controlling for size and user activity recovers topical relationships.
 - **Cannot conclude.** Affinity measures co-commenting, not friendship, conversation or influence.
 
-![Raw overlap (left) versus surprising overlap (right)](screenshots/02_atlas_raw.png)
+![Every pair sharing a commenter: grey within chance, coloured when surprising](screenshots/05_atlas_surprise.png)
 ![The adjusted Atlas](screenshots/03_atlas_adjusted.png)
 
 ### 5.2 Communities and connectors (RQ2)
 
-The validated network pooled over all months has **{S['anchor']['communities']} communities**: weighted modularity {S['anchor']['weighted_modularity']}, mean agreement between 20 Leiden seeds ARI {S['anchor']['seed_ari']}. The communities found in each quarter agree with this anchor partition at ARI {', '.join(str(S['period_communities'][q]['ari_vs_anchor']) for q in Q)}. They largely follow the frame categories (ARI {S['category_ari_vs_anchor']}), with informative exceptions: r/Economics sits with politics, and media subreddits split between the front-page cluster and hobbies.
+The validated network pooled over all months has **{comm_phrase}**: weighted modularity {S['anchor']['weighted_modularity']}, mean agreement between 20 Leiden seeds ARI {S['anchor']['seed_ari']}. The communities found in each quarter agree with this anchor partition at ARI {', '.join(str(S['period_communities'][q]['ari_vs_anchor']) for q in Q)}. They partly follow the frame categories (ARI {S['category_ari_vs_anchor']}), with informative exceptions: r/Economics sits with politics, and media subreddits split between the front-page cluster and hobbies.
 
 {community_table()}
 
-**Connectors.** The participation coefficient is 0 when all of a subreddit's surprising links stay inside its own community and approaches 1 when they spread evenly across communities. Among subreddits with at least {Cm['min_degree']} links, the highest scores in every quarter belong to mid-sized topical communities, not hubs:
+**Connectors.** The participation coefficient is 0 when all of a subreddit's surprising links stay inside its own community and approaches 1 when they spread evenly across communities. Among subreddits with at least {Cm['min_degree']} links, the highest scores in every quarter belong to mid-sized topical communities{f", with one front-page hub among them (r/{hub_conn[0]})" if hub_conn else ""}:
 
 {connectors_table()}
 
-Front-page hubs average {Cm['hub_mean_participation']:.2f}, topical communities {Cm['topical_mean_participation']:.2f}. Connector rankings are stable between quarters (Spearman ρ {', '.join(f"{v:.2f}" for v in Cm['rank_stability'].values())}). *Cannot conclude:* a connector shares unusually many commenters with several clusters; that is not evidence that information flows through it.
+Front-page hubs average {Cm['hub_mean_participation']:.2f}, topical communities {Cm['topical_mean_participation']:.2f}; {Cm['note'][0].lower() + Cm['note'][1:] if Cm.get('note') else 'the difference is not tested'} Connector rankings are stable between quarters (Spearman ρ {', '.join(f"{v:.2f}" for v in Cm['rank_stability'].values())}).
 
-### 5.3 Unexpected neighbours (RQ2)
+**Sealed and porous clusters.** The share of a cluster's surprising links that leave it, compared with what a random rewiring that keeps every subreddit's number of links would give:
+
+{outward_table()}
+
+r/{gi['name']} is the opposite of a connector: all {gi['links_inside_bloc']} of its surprising links lie inside the {gi['bloc']} cluster; it is above expectation with {gi['above_expectation_inside_bloc']} of the other {gi['bloc_size'] - 1} members of that cluster and below expectation with {gi['below_expectation_outside_bloc']} of the {gi['outside_bloc_count']} communities outside it. Part of this is arithmetic: holding {pct(Am['biggest_share_of_commenters'], 0)} of all commenters, it cannot share much more than chance with anyone.
+
+*Cannot conclude:* a connector shares unusually many commenters with several clusters; that is not evidence that information flows through it. The participation coefficient depends on the partition.
+
+### 5.3 Neighbours and strangers (RQ2)
 
 **{Bm['robust_cross_category_links']} links** join subreddits from different frame categories, excluding hubs, and are significant in every quarter under both thresholds. The strongest:
 
 {links_table(Bm['top_links'])}
 
-Two of the three strongest pair a country's politics forum with the same country's personal-finance forum: for these communities, nationality organises audiences more than topic. Links that also cross the detected communities include {', '.join(f"r/{x['a']} – r/{x['b']} (≥ {x['min_affinity']:.2f}×)" for x in cross[:6])}. *Cannot conclude:* why audiences overlap. Shared geography, profession or demographics are all possible, and without text we cannot tell them apart.
+The two strongest pair a country's politics forum with the same country's personal-finance forum, which is consistent with shared nationality rather than topic organising these audiences. The control makes the point: the same personal-finance topic across the border (r/{ctrl['a']} – r/{ctrl['b']}) shares {n(ctrl['shared'])} commenters where {n(ctrl['expected'])} were expected ({ctrl['affinity']:.2f}×), fewer than chance in every quarter, and the national forums' ties to the US-default r/politics and r/personalfinance are modest by comparison ({'; '.join(f"r/{u['a']} – r/{u['b']} {u['affinity']:.2f}× ({pair_status(u)})" for u in country['to_us_default'])}). Only two same-country pairs exist in the frame, so this is consistent with these cases, not a general law.
 
-### 5.4 Stability and crowds (RQ3)
+{country_table()}
+
+Links that also cross the detected communities include {', '.join(f"r/{x['a']} – r/{x['b']} (≥ {x['min_affinity']:.2f}×)" for x in cross[:6])}. **Audiences that keep apart.** The same test in the other direction finds strangers: {n(avoided_pairs) if avoided_pairs is not None else 'many'} pairs share fewer commenters than chance under the avoided rule (lower-tail FDR {pct(S['alpha'], 0)}, affinity ≤ 0.5, expected ≥ 20). The widest gulfs are not political. The five beauty, fashion and fibre-craft communities ({', '.join('r/' + x for x in Bm['beauty_craft'])}) share {Bm['blocks'][0]['affinity']:.2f}× of the expected overlap with the {Bm['blocks'][0]['with'].lower()} cluster and {Bm['blocks'][1]['affinity']:.2f}× with the {Bm['blocks'][1]['with'].lower()} cluster, in every quarter. Some communities keep apart from almost everyone: r/{iso['name']} shares fewer commenters than chance with {iso['below_chance_partners']} of {S['subreddits'] - 1} (the median community: {Bm['median_below_chance_partners']:.1f}).
+
+{apart_table()}
+
+**Political opponents are not strangers.** None of the {ideo['pairs']} pairs among {', '.join('r/' + x for x in ideo['subreddits'])} shares fewer commenters than chance; {ideo['validated']} of {ideo['pairs']} share more (weakest r/{ideo['weakest_pair'][0]} – r/{ideo['weakest_pair'][1]} at {ideo['min_affinity']:.2f}×, median {ideo['median_affinity']:.2f}×).
+
+*Cannot conclude:* why audiences overlap or keep apart. Shared geography, profession or demographics are all possible, and without text we cannot tell them apart.
+
+### 5.4 Stability, and what crowds change (RQ3)
 
 **Stability.** Consecutive quarters share {', '.join(f"{v:.2f}" for v in qj.values())} of their validated links (Jaccard); consecutive months share {min(mj.values()):.2f}–{max(mj.values()):.2f}. Change smaller than that is normal churn.
 
-**The crypto exodus.** r/Bitcoin's monthly commenters peak in {mlabel(Dm['peak_month']['Bitcoin'])}, the month Bitcoin's price peaked (17 Dec 2017). From {mlabel(base)} to {mlabel(months[-1])}, {', '.join(f"r/{k} {v * 100:+.0f}%" for k, v in Dm['change_since_baseline'].items() if k in crypto_names)}, while r/investing changed {Dm['change_since_baseline']['investing'] * 100:+.0f}% and the whole frame {Dm['frame_change_since_baseline'] * 100:+.0f}%. Meanwhile the remaining audiences overlapped far more: r/{cp_key.replace('|', '–r/')} affinity was {cp[0]}× in {mlabel(months[0])}, fell to {cp[mi[base]]}× at the peak as newcomers arrived, and rose to **{cp[-1]}×** by {mlabel(months[-1])} ({cp2[-1]}× under the stricter threshold).
+**The crypto exodus: the trace in the counts.** r/Bitcoin's monthly commenters peak in {mlabel(Dm['peak_month']['Bitcoin'])}, the month Bitcoin's price peaked (17 Dec 2017); r/CryptoCurrency peaks a month later ({mlabel(Dm['peak_month']['CryptoCurrency'])}). From {mlabel(base)} to {mlabel(months[-1])}, {', '.join(f"r/{k} {v * 100:+.0f}%" for k, v in Dm['change_since_baseline'].items() if k in crypto_names)}, while r/investing changed {Dm['change_since_baseline']['investing'] * 100:+.0f}% and the whole frame {Dm['frame_change_since_baseline'] * 100:+.0f}%.
 
-**The Infinity War crowd.** *Avengers: Infinity War* opened in the US on 27 April 2018. r/marvelstudios went from a March median of {n(Dm['marvel_release_week']['march_median_weekly'])} weekly commenters to {n(Dm['marvel_release_week']['authors'])} in the release week. In April, r/{mk.replace('|', '–r/')} affinity fell to {mv[mi['2018-04']]}× (from {mv[mi['2018-01']]}× in January 2018) and recovered to {mv[-1]}× by {mlabel(months[-1])}.
+**The obvious reading, and the careful one.** r/{cp_key.replace('|', '–r/')} affinity was {cp[mi[base]]}× at the peak and **{cp[-1]}×** by {mlabel(months[-1])} ({cp2[-1]}× under the stricter threshold), which reads as if the people who stayed were far more tightly bound. The behavioural check says otherwise: the share of r/{cp_key.split('|')[0]} commenters who also posted in r/{cp_key.split('|')[1]} moved only from {pct(rate_ab[mi[base]], 0)} to {pct(rate_ab[-1], 0)}, the reverse share fell from {pct(rate_ba[mi[base]], 0)} to {pct(rate_ba[-1], 0)}, and raw overlap (cosine) fell from {cos_m[mi[base]]:.2f} to {cos_m[-1]:.2f}. The ratio rose because the expected overlap shrinks with the communities: affinity compares observed overlap with a size-dependent expectation, so when two communities lose most of their commenters the same cross-posting behaviour produces a much larger ratio.
 
-**General tendency.** Across all communities, month-to-month audience growth goes with falling affinity to their usual neighbours, and shrinkage with rising affinity, but modestly: Spearman ρ = {gt['spearman_large_swings']} over {gt['n_large_swings']} swings larger than 25% (ρ = {gt['spearman_all_steps']} over all {n(gt['n_steps'])} month-steps).
+**A crowd arriving: The Last Jedi.** {f"In {mlabel('2017-12')} (US release {sw['release']}) r/{sw['name']} had {n(sw['monthly_authors'][mi['2017-12']])} commenters, {sw['dec_over_nov']:.2f}× November, and {pct(sw['new_share_dec'], 0)} of them had not commented there earlier in the window. Its affinity with every fandom neighbour dipped that month ({', '.join(f'r/{p} {sw['partner_affinity'][p][mi['2017-11']]:.2f}× → {sw['partner_affinity'][p][mi['2017-12']]:.2f}×' for p in list(sw['partner_affinity'])[:3])}) and recovered in January: the same arithmetic in reverse." if sw else "Not computed in this build."}
 
-- **Meaning.** An arriving crowd consists largely of people who comment in only one of the related communities, which dilutes surprising overlap. A departing crowd leaves behind a core that is active across them.
-- **Cannot conclude.** That the price crash or the film *caused* these changes. Event dates are external context and the patterns are temporal associations.
+**The Infinity War crowd.** *Avengers: Infinity War* opened in the US on 27 April 2018. r/marvelstudios went from a March median of {n(Dm['marvel_release_week']['march_median_weekly'])} weekly commenters to {n(Dm['marvel_release_week']['authors'])} in the release week. r/{mk.replace('|', '–r/')} affinity fell from {mv[mi['2018-01']]}× in January 2018 to {mv[mi['2018-04']]}× in April and recovered to {mv[-1]}× by {mlabel(months[-1])}, while the share of r/{mvl['pair'][0]} commenters also active in r/{mvl['pair'][1]} rose from {pct(mvl['cross_rate_ab'][mi['2018-01']], 0)} to {pct(mvl['cross_rate_ab'][mi['2018-04']], 0)}: both communities grew, the expected overlap grew faster, and the ratio fell although cross-posting did not.
 
-![Crypto and Marvel timelines](screenshots/09_story_crowds_timeline.png)
+**General tendency.** Across the {gt['n_subreddits']} communities with at least five stable, well-measured ties ({n(gt['n_stable_ties'])} ties), faster growth over the year went with a downward drift in affinity (Spearman ρ = {gt['spearman_growth_vs_affinity_trend']}) while raw overlap drifted up with growth (ρ = {gt['spearman_growth_vs_cosine_trend']}). Most of the "change" in affinity around a crowd is the expectation moving with size, not people changing where they comment.
+
+- **Meaning.** Crowds leave a clear trace in the counts, and the share of commenters who cross between related communities is the right behavioural check. A changed affinity is not by itself a changed behaviour; the Atlas therefore shows the cross-posting share next to affinity in the crowd discovery.
+- **Cannot conclude.** That the price crash or the films *caused* these changes. Event dates are external context and the patterns are temporal associations.
+
+![Monthly commenters around the Bitcoin peak](screenshots/09_story_crowds_timeline.png)
+![Affinity next to the cross-posting share for r/Bitcoin – r/CryptoCurrency](screenshots/11_story_crowds_after.png)
 
 ---
 
 ## 6. The application: the Community Atlas
 
-The Atlas is a static web application (HTML/JavaScript with sigma.js, all libraries bundled) that reads only the aggregate JSON produced by `atlas/build_atlas.py`. Every view is addressable by URL, so a view can be shared or cited.
+The Atlas is a static web application (HTML/JavaScript with sigma.js, all libraries bundled) that reads only the aggregate JSON produced by `atlas/build_atlas.py`; nothing runs on a server, and the application says so. Every view is addressable by URL, so a view can be shared or cited. It is organised so that a visitor moves through four stages — discover, explore, understand, verify — without needing this report:
 
-- **Discoveries:** the question, key numbers, a live raw ↔ adjusted toggle, and the four stories.
-- **Atlas map:** search; period selector (whole window, quarters, months); raw ↔ adjusted links; colour by detected community or frame category; community filter; hover details; a side panel with the selected subreddit's strongest overlaps (observed vs expected) and what raw overlap would have shown.
-- **Explore:** a profile for any subreddit: ranked surprising overlaps, raw-vs-adjusted neighbours, weekly commenters, monthly affinity with its strongest neighbours (significant months marked), and its connector role by quarter.
-- **Compare:** two subreddits (verdict, monthly affinity, per-quarter table, shared neighbours), or two periods (side-by-side maps with appeared and disappeared links, against the churn baseline).
-- **Stories:** four guided walkthroughs that drive the map, show their evidence and caveats, and end with "keep exploring from here".
-- **Methods & data:** scope, cleaning, the metric, validation, project evolution, privacy, limitations and downloads (CSV and GEXF for Gephi and Tableau).
+- **Start:** a scroll-driven opening that poses the question with two real pairs (one large but ordinary, one small but surprising) and then transforms one map in three steps: every pair sharing a commenter, the same map with pairs within chance greyed out, and the surprising links alone. The legend states what circle size, lines, colour and distance mean.
+- **Guided tour:** a ten-step overlay that drives the real pages (map views, a profile, two discoveries, the technical walkthrough, the limits). It can be paused by navigating elsewhere and resumed from where it was left.
+- **Discoveries:** four guided stories. Each step moves the map and highlights the relevant subreddits; the evidence and the caveats sit beside it; a closing step states the takeaway and offers actions to investigate the finding independently (compare the pair, open the profile, change the period).
+- **Atlas:** search; period selector (whole window, quarters, months); three line views (surprising only, chance vs surprise, raw overlap); colour by detected community or frame category; community isolation; hover details; a panel for the selected subreddit with its strongest overlaps (observed vs expected), the pairs it shares *fewer* commenters with than chance, and what raw overlap would have shown; "back to overview".
+- **Explore:** a profile for any subreddit: ranked surprising overlaps, raw-vs-adjusted neighbours, pairs below chance, connector role by quarter, weekly commenters and monthly affinity with its strongest neighbours.
+- **Compare:** two subreddits (a three-way verdict — surprising, within chance, fewer than chance — with p-values, monthly affinity, per-quarter table, shared neighbours), or two periods (side-by-side maps with links that appeared and disappeared, against the churn baseline).
+- **How it's made:** a nine-stage technical walkthrough fed by `pipeline.json`: input, transformation, output, purpose, a real example, the tests that guard the stage and what would go wrong without it. It includes the breadth histogram behind the hairball, a worked example of two real pairs with the breadth of their shared commenters, a toy BiCM example run through the real model, the test inventory, and artifact sizes and hashes. Badges separate what is precomputed, computed in the browser, and historical (V1).
+- **Scope & limits:** sample and window, cleaning, validation, how the project evolved, the label the network corrected, privacy, and what can and cannot be concluded.
 
-The existing Streamlit dashboard remains as the **Data & Pipeline Console** (coverage, cleaning audit, bot review).
+The existing Streamlit dashboard remains as the **Data & Pipeline Console** (coverage, cleaning audit, bot review). Design decisions are recorded in `docs/V2_DESIGN_DECISIONS.md`.
 
+![The opening: raw overlap, then chance vs surprise, then the map](screenshots/02_start_raw.png)
+![The guided tour driving the atlas](screenshots/06_tour_surprise.png)
 ![Subreddit drawer](screenshots/04_atlas_selected.png)
 ![Comparing two periods](screenshots/15_compare_periods.png)
 
@@ -276,9 +350,9 @@ The existing Streamlit dashboard remains as the **Data & Pipeline Console** (cov
 
 1. **Proposal.** Test whether bridge positions between communities persist while their occupants change, using a cosine projection, Leiden communities, participation-coefficient brokers and a turnover null model.
 2. **V1 on real data** (tag `v1-baseline`). The cosine network linked {pct(V1['2018Q1']['density'], 2)} of pairs in 2018 Q1. Leiden found 4 communities, so only 6 bridge positions existed, all saturated by thousands of brokers. Pre-registered quality and sample-size gates failed, and all temporal results were labelled descriptive.
-3. **Audit.** V1's reported community quality (Q = {V1['2018Q1']['stored_unweighted_q']}) was *unweighted* modularity: leidenalg's `.modularity` ignores edge weights. The same partitions have weighted modularity {V1['2018Q1']['weighted_q']}–{max(V1[q]['weighted_q'] for q in V1 if q.startswith('20'))} against a shuffled-label maximum near 0 (`v1_modularity_audit.json`). V1's communities were real but weak; the bridge design was limited by the representation.
-4. **Re-representation.** Literature on bipartite projections pointed to null-model validation (§2). On real data, BiCM-validated links were about 12% dense per quarter, stable over time, and reproduced exactly by the reference implementation.
-5. **Final deliverable.** The Atlas keeps the bridge idea as the connector role and the original temporal interest in the crowd stories. The occupant-turnover hypothesis remains future work: it would need many more bridge positions than V1 could provide, and a properly matched null model.
+3. **Audit.** V1's reported community quality (Q = {V1['2018Q1']['stored_unweighted_q']}) was *unweighted* modularity: leidenalg's `.modularity` ignores edge weights. The same partitions have weighted modularity {V1['2018Q1']['weighted_q']}–{max(V1[q]['weighted_q'] for q in V1 if q.startswith('20'))} per quarter ({V1['anchor_pooled']['weighted_q'] if isinstance(V1.get('anchor_pooled'), dict) else V1.get('anchor_pooled')} pooled over the window) against a shuffled-label maximum near 0 (`v1_modularity_audit.json`). V1's communities were real but weak; the bridge design was limited by the representation.
+4. **Re-representation.** Literature on bipartite projections pointed to null-model validation (§2). On real data, BiCM-validated links were {pct(min(S['validated_density'][q] for q in Q), 0)}–{pct(max(S['validated_density'][q] for q in Q), 0)} dense per quarter, stable over time, and reproduced exactly by the reference implementation.
+5. **Final deliverable.** The Atlas keeps the bridge idea as the connector role and the original temporal interest in the crowd stories. **The submitted hypothesis is not answered here.** Testing whether bridge positions outlast their occupants would need link-level bridge positions on the validated network and a matched occupant-turnover null model, which remains future work.
 
 ---
 
@@ -289,14 +363,17 @@ The existing Streamlit dashboard remains as the **Data & Pipeline Console** (cov
 - **No text.** Co-commenting is not conversation or influence; motives and topics cannot be inferred.
 - **Statistical choices.** The test approximates the Poisson-binomial (slightly conservative); the FDR level and the activity threshold change details. The number of communities depends on thresholds (ARI {S['anchor']['sensitivity_ari']} under the stricter one).
 - **Events.** Associations, not causal effects.
-- **Labels.** Frame categories come from a keyword rule and can be wrong.{f" The network suggests r/{vig['name']} (labelled “{CAT[vig['label']]}”) is a smoked-food community: its strongest overlaps are {', '.join('r/' + x['name'] for x in vig['neighbours'][:3])}, and it peaks in {mlabel(vig['peak_month'])}." if vig else ""}
+- **A size-dependent measure.** Affinity compares observed overlap with an expectation that scales with community size. For the largest communities the expectation is close to the maximum possible, so their affinity is bounded near 1 (r/{Am['biggest']}: about {Am['biggest_affinity_ceiling_median']:.1f}× at most); and when a community's size changes sharply, affinity moves even if cross-posting behaviour does not (§5.4).
+- **Window length.** The default view pools all {len(months)} months. Pooled affinities run lower than quarterly ones (the expected overlap grows with pooled breadth) and pooled density higher ({pct(S['validated_density']['all'])} against {', '.join(pct(S['validated_density'][q]) for q in Q)} by quarter), so like must be compared with like; the discoveries quote quarters or months when they describe change.
+- **Fewer-than-chance links.** The lower-tail test needs enough expected overlap to be informative; the avoided rule's floor (expected ≥ 20, affinity ≤ 0.5) means small pairs can never be marked, and the count depends on that floor.
+- **Labels.** Frame categories come from a keyword rule and can be wrong{f": for {label_mismatch['count']} of {S['subreddits']} subreddits the category the network places them nearest to differs from the label (for example {', '.join(f'r/{x['name']}: {CAT[x['frame']]} → {CAT[x['network']]}' for x in label_mismatch['examples'][:3])})" if label_mismatch else ""}.{f" The network suggests r/{vig['name']} (labelled “{CAT[vig['label']]}”) is a smoked-food community: its strongest overlaps are {', '.join('r/' + x['name'] for x in vig['neighbours'][:3])}, and it peaks in {mlabel(vig['peak_month'])}." if vig else ""}
 - **Ethics and privacy.** Data are public. Usernames are salted and hashed at collection, and the salt is never committed. Only subreddit-level aggregates are published, which an automated test checks. Mental-health communities appear only as aggregates. Earlier commits of this repository contain a bot-review file of 200 hashed account IDs from a prototype run; it is now untracked and ignored, and purging it from the remote history is recommended.
 
 ---
 
 ## 9. Conclusion
 
-Raw shared-audience networks mostly measure size. Once size and user activity are accounted for, about one in seven subreddit pairs in our sample shares a surprisingly large audience. Those links form stable topical communities, reveal cross-topic neighbours (a nation's politics and personal-finance forums) and connector communities (r/Frugal, r/Economics, r/askscience), and respond to crowds arriving and leaving. The Community Atlas lets an evaluator verify each of these claims interactively. **Future work:** extend the window to 2019–2022 with the same pipeline; revisit bridge-occupant turnover with link-level bridge positions; add a reply-network layer (`parent_id` is available in the source) to separate co-presence from conversation.
+Raw shared-audience networks mostly measure size. Once size and user activity are accounted for, about one in seven subreddit pairs in our sample shares a surprisingly large audience. Those links form stable topical communities, reveal cross-topic neighbours (a nation's politics and personal-finance forums) and connector communities (r/Frugal, r/Economics, r/askscience), and the same test marks the audiences that keep apart. Crowds arriving and leaving are plainly visible in the counts, but most of the apparent change in affinity around them is the expectation moving with size: the cross-posting share, shown beside affinity in the Atlas, barely moves. The Community Atlas lets an evaluator verify each of these claims interactively. **Future work:** extend the window to 2019–2022 with the same pipeline; revisit bridge-occupant turnover with link-level bridge positions; add a reply-network layer (`parent_id` is available in the source) to separate co-presence from conversation.
 
 ---
 
@@ -340,11 +417,15 @@ Raw shared-audience networks mostly measure size. Once size and user activity ar
 | Distinct commenters | {n(S['users_total'])} | `atlas/web/data/meta.json` → `summary.users_total` |
 | Raw-overlap density (all months) | {pct(S['cosine_density']['all'], 2)} | `meta.json` → `summary.cosine_density.all` |
 | Validated density (all months / quarters) | {pct(S['validated_density']['all'])} / {', '.join(pct(S['validated_density'][q]) for q in Q)} | `meta.json` → `summary.validated_density` |
-| Communities, weighted Q, seed ARI | {S['anchor']['communities']}, {S['anchor']['weighted_modularity']}, {S['anchor']['seed_ari']} | `meta.json` → `summary.anchor` |
+| Communities (all / major), weighted Q, seed ARI | {S['anchor']['communities']} / {S['anchor'].get('communities_major', '–')}, {S['anchor']['weighted_modularity']}, {S['anchor']['seed_ari']} | `meta.json` → `summary.anchor` |
+| Largest shared audience, never surprising | r/{giant['a']} – r/{giant['b']}: {n(giant['shared'])} shared, {n(giant['expected'])} expected | `stories.json` → `popularity.metrics.giant_pair` |
+| Pairs sharing fewer commenters than chance (avoided rule) | {n(avoided_pairs) if avoided_pairs is not None else '–'} | `pipeline.json` → `stages.validated.avoided_pairs`; per pair in `pairs_*.json` |
 | Hub share of top-10 neighbours (raw / adjusted) | {pct(Am['hub_share_cosine'], 0)} / {pct(Am['hub_share_affinity'], 0)} | `stories.json` → `popularity.metrics` |
 | Robust cross-category links | {Bm['robust_cross_category_links']} | `stories.json` → `neighbours.metrics` |
 | Top connector participation | r/{Cm['connectors'][0]['name']} {Cm['connectors'][0]['participation_min']:.2f} | `stories.json` → `connectors.metrics`; `nodes.json` |
 | r/{cp_key.replace('|', '–r/')} affinity ({mlabel(months[0])} / {mlabel(base)} / {mlabel(months[-1])}) | {cp[0]} / {cp[mi[base]]} / {cp[-1]} | `stories.json` → `crowds.metrics.crypto_pair_affinity`; recomputed by `tests/test_atlas_artifacts.py` |
+| Cross-posting share r/{cp_key.split('|')[0]} → r/{cp_key.split('|')[1]} ({mlabel(base)} / {mlabel(months[-1])}) | {pct(rate_ab[mi[base]], 0)} / {pct(rate_ab[-1], 0)} | `stories.json` → `crowds.metrics.crypto_cross_rate_ab` |
+| Growth vs affinity drift / vs raw-overlap drift (Spearman) | {gt['spearman_growth_vs_affinity_trend']} / {gt['spearman_growth_vs_cosine_trend']} | `stories.json` → `crowds.metrics.tendency` |
 | Quarter-to-quarter link Jaccard | {', '.join(f"{v:.3f}" for v in qj.values())} | `meta.json` → `summary.quarter_edge_jaccard` |
 | Reference cross-check | {CC['validated_ours']} = {CC['validated_reference']} links | `atlas/validation/bicm_crosscheck.json` |
 | V1 stored vs weighted Q (2018 Q1) | {V1['2018Q1']['stored_unweighted_q']} vs {V1['2018Q1']['weighted_q']} | `data_curation/data/logs/v1_modularity_audit.json` |
@@ -355,7 +436,7 @@ Raw shared-audience networks mostly measure size. Once size and user activity ar
 pip install -r requirements.txt
 python data_curation/run_pipeline.py --start 2017 10 --end 2018 9   # fetch + clean (needs a local salt; see README)
 python atlas/build_atlas.py                                          # all Atlas data, stories and exports (~6–8 min)
-python -m pytest tests/                                              # 108 tests (1 needs the optional bicm package)
+python -m pytest tests/                                              # {pl_tests} tests (1 needs the optional bicm package)
 python atlas/serve.py                                                # open the Atlas
 python tools/build_docs.py --pdf                                     # this report
 ```
@@ -365,17 +446,17 @@ python tools/build_docs.py --pdf                                     # this repo
 
 DEMO = f"""# Five-minute demo script
 
-Start `python atlas/serve.py` (opens http://127.0.0.1:8000) before presenting. Each step lists the view, what to say, and the figure on screen; all figures come from the current build.
+Start `python atlas/serve.py` (opens http://127.0.0.1:8000) before presenting. Each step lists the view, what to say, and the figure on screen; all figures come from the current build. The guided tour (top-right button) follows the same order if you prefer to let the application lead.
 
 | Time | Do | Say |
 |---|---|---|
-| 0:00 | **Discoveries** page. Click **Raw overlap** on the hero map, then **Adjusted**. | "We took {n(tot_clean)} Reddit comments from {S['subreddits']} subreddits. If you link communities whenever they share a commenter, {pct(S['cosine_density']['all'], 2)} of pairs are linked: a hairball. When we keep only pairs that share far more commenters than size and activity predict, {pct(S['validated_density']['all'])} remain, and topics appear." |
-| 0:45 | **Atlas**. Search **personalfinance**. | "By raw overlap its neighbours are hubs like r/AskReddit and r/pics. Adjusted, they are {adj_list.split(', r/')[0]} and r/{Am['example_affinity_neighbours'][1]['name']}. The number is observed ÷ expected shared commenters." |
-| 1:30 | **Stories → Unexpected neighbours** (step 1). | "r/CanadaPolitics and r/PersonalFinanceCanada share {n(Bm['top_links'][0]['shared_all'])} commenters where {n(Bm['top_links'][0]['expected_all'])} were expected, at least {Bm['top_links'][0]['min_affinity']}× in every quarter. The UK pair is next: nationality, not topic, organises these audiences." |
-| 2:15 | **Stories → When crowds arrive and leave**: timeline, then steps 2–3, then the Marvel step. | "Crypto commenters fell {abs(Dm['change_since_baseline']['Bitcoin']) * 100:.0f}% after Bitcoin's December 2017 peak while the frame grew. The remaining Bitcoin and CryptoCurrency audiences went from {cp[mi[base]]}× to {cp[-1]}×. The Infinity War crowd did the opposite: Marvel affinity dropped to {mv[mi['2018-04']]}× in April. This is association, not causation." |
-| 3:15 | **Methods & data**: scroll through the pipeline and "How we checked it". | "Fetch, salted hashing and cleaning, then the BiCM null model and a 1% false discovery rate. Our implementation matches the published `bicm` package link-for-link, and automated tests recompute every story number from the published data." |
-| 4:00 | **Methods → How the project evolved**, then **Compare → Two periods**. | "We set out to test whether bridge positions outlast their occupants. The first network was {pct(V1['2018Q1']['density'], 2)} dense with only 6 possible bridges, so we changed the measurement lens. Links are stable ({min(qj.values()):.2f}–{max(qj.values()):.2f} quarter to quarter), and the remaining changes are visible here." |
-| 4:40 | Back to **Atlas**; hover a connector such as r/Frugal. | "Limits: one sample of {S['subreddits']} subreddits, {len(months)} months, comments only, no text. Everything is aggregate and reproducible with one command." |
+| 0:00 | **Start** page; point at the two pair cards. | "Two communities share thousands of commenters. Is that a relationship? r/{Am['biggest']} and r/{Am['example']} share {n(lead_big['shared'])} people, {lead_big.get('affinity', 0):.2f}× what chance predicts: nothing surprising. r/{lead['a']} and r/{lead['b']} share {n(lead['shared_all'])} where {n(lead['expected_all'])} were expected: {fmtx(lead['shared_all'] / lead['expected_all'])} chance over the year, at least {fmtx(lead['min_affinity'])} in every quarter." |
+| 0:40 | Scroll: the map turns from the hairball into grey-vs-coloured, then into the surprising links. | "Link every pair that shares a commenter and {pct(S['cosine_density']['all'], 2)} of pairs connect. Ask what chance would produce, and most lines go grey. Keep the surprising ones: {pct(S['validated_density']['all'])} of pairs, {comm_phrase}." |
+| 1:30 | **Discoveries → Neighbours and strangers**, step 1, then step 4 (audiences that keep apart). | "A nation's politics and personal-finance forums share several times more people than chance, while the same money topic across the border shares a quarter of what chance predicts. The same test finds strangers: r/linux and r/MakeupAddiction share {Bm['lowest_pairs'][0]['affinity']:.3f}× of the expected overlap." |
+| 2:15 | **Discoveries → When crowds arrive and leave**: timeline, then the peak and the September map. | "r/Bitcoin's commenters fell {abs(Dm['change_since_baseline']['Bitcoin']) * 100:.0f}% after the December 2017 peak while the frame grew {Dm['frame_change_since_baseline'] * 100:.0f}%. Its affinity with r/CryptoCurrency looks like it tripled, {cp[mi[base]]}× to {cp[-1]}×, but the share of r/Bitcoin commenters who also post there moved only from {pct(rate_ab[mi[base]], 0)} to {pct(rate_ab[-1], 0)}: the ratio rose because the expectation shrank with the communities. The crowds arriving for The Last Jedi and Infinity War show the same arithmetic in reverse. Associations with dated events, not causes." |
+| 3:00 | **Atlas**: search r/{Am['example']}; show the drawer; switch to "Chance vs surprise". | "By raw overlap its neighbours are hubs. Adjusted, they are {adj_list.split(', r/')[0]} and r/{Am['example_affinity_neighbours'][1]['name']}. Every number is observed ÷ expected shared commenters." |
+| 3:45 | **How it's made** → stage 5 (Expected) and stage 6 (Surprising links). | "A shuffled Reddit where everyone keeps their breadth and every community its size gives an expected overlap per pair; a Poisson test with a 1% false-discovery rate keeps the surprising ones. Our code matches the published `bicm` package link for link, and {pl_tests} automated tests recompute the story numbers." |
+| 4:30 | **Scope & limits** → "What we can and cannot conclude". | "One sample of {S['subreddits']} subreddits, {len(months)} months, comments only, no text. We can show which audiences overlap more or less than chance and how that changed; we cannot show why, or that any event caused it." |
 
 **If something fails live:** every view is a URL, and `docs/screenshots/` holds a capture of each step.
 """

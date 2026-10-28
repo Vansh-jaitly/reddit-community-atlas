@@ -4,10 +4,11 @@ frame.csv is a committed artefact so a reviewer can read the frame without
 running anything, but it is GENERATED: this script is the only sanctioned way
 to change it, and a test asserts the committed file still matches the rule.
 """
+from pathlib import Path
 import os, sys
 import pandas as pd
 
-ROOT = r"C:\Users\vansh\Desktop\CSMA\sm"
+ROOT = str(Path(__file__).resolve().parents[1])
 sys.path.insert(0, os.path.join(ROOT, "data_curation"))
 import frame_rules as FR
 

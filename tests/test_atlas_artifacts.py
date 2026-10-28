@@ -85,7 +85,7 @@ def test_story_numbers_recompute_from_pair_files(meta, nodes):
         assert min(nd["participation_by_quarter"].values()) == pytest.approx(c["participation_min"], abs=1e-3)
 
 
-def test_no_author_hashes_or_salt_published():
+def test_no_hashed_authors_or_salt_published():
     hex16 = re.compile(r"(?<![\w.])[0-9a-f]{16}(?![\w.])")   # skips digits of decimals like 1.1366e-08
     root = DATA.parent
     for f in list(root.rglob("*.json")) + list(root.rglob("*.csv")) + list(root.rglob("*.gexf")):
@@ -93,3 +93,44 @@ def test_no_author_hashes_or_salt_published():
         hits = {h for h in hex16.findall(text) if re.search("[a-f]", h)}
         assert not hits, f"{f.name} contains hash-like tokens: {sorted(hits)[:3]}"
         assert "author_h" not in text, f"{f.name} mentions author_h"
+
+
+def test_pvalues_and_avoided_pairs_are_consistent(meta, nodes):
+    """p-values are published per pair; 'avoided' pairs are the lower-tail discoveries that also clear the effect-size floor."""
+    n = len(nodes)
+    m = n * (n - 1) // 2
+    for period in meta["periods"]:
+        p = pairs(period["id"])
+        assert len(p["p_high"]) == len(p["p_low"]) == m
+        shared, expected = np.array(p["shared"]), np.array(p["expected"])
+        av = np.array(p["avoided"], dtype=int)
+        if len(av):
+            assert np.all(shared[av] <= 0.5 * expected[av] + 1e-9)
+            assert np.all(expected[av] >= 20)
+            assert np.all(np.array(p["p_low"])[av] < 0.01)
+        v = np.array(p["validated"], dtype=int)
+        assert not set(v) & set(av)
+        assert np.all(np.array(p["p_high"])[v] < 0.01)
+
+
+def test_pipeline_facts_match_pair_files(meta, nodes):
+    """pipeline.json's worked examples and stage counts recompute from the pairs files."""
+    pl = load("pipeline.json")
+    idx = {nd["name"]: nd["id"] for nd in nodes}
+    n = len(nodes)
+    p = pairs("all")
+    for e in pl["examples"]:
+        k = k_of(idx[e["a"]], idx[e["b"]], n)
+        assert p["shared"][k] == e["shared"]
+        assert p["expected"][k] == pytest.approx(e["expected"], abs=0.06)
+        assert (k in p["validated"]) == e["validated"]
+        assert sum(b["n"] for b in e["shared_users_by_breadth"]) == e["shared"]
+    st = pl["stages"]
+    assert st["validated"]["validated_pairs"] == len(p["validated"])
+    assert st["validated"]["avoided_pairs"] == len(p["avoided"])
+    assert st["raw_overlap"]["pairs_sharing_any"] == int((np.array(p["shared"]) > 0).sum())
+    assert st["raw_overlap"]["pairs_total"] == n * (n - 1) // 2
+    assert st["communities"]["count"] == len(meta["communities"])
+    assert pl["tests"], "test inventory should not be empty"
+    toy = pl["toy"]
+    assert all(abs(pr["affinity"] - (pr["shared"] / pr["expected"] if pr["expected"] else 0)) < 0.02 for pr in toy["pairs"])

@@ -19,31 +19,40 @@ ROOT = Path(__file__).resolve().parents[1]
 SHOTS = ROOT / "docs/screenshots"
 OUT = ROOT / "docs/demo/atlas_walkthrough.mp4"
 
-meta = json.loads((ROOT / "atlas/web/data/meta.json").read_text())
-st = {s["id"]: s for s in json.loads((ROOT / "atlas/web/data/stories.json").read_text())["stories"]}
+meta = json.loads((ROOT / "atlas/web/data/meta.json").read_text(encoding="utf-8"))
+st = {s["id"]: s for s in json.loads((ROOT / "atlas/web/data/stories.json").read_text(encoding="utf-8"))["stories"]}
 S = meta["summary"]
 clean = sum(int(r["rows_clean"]) for r in meta["cleaning_report"])
 A, B, C, D = (st[k]["metrics"] for k in ("popularity", "neighbours", "connectors", "crowds"))
 cp = next(iter(D["crypto_pair_affinity"].values()))
 mv = next(iter(D["marvel_pair_affinity"].values()))
 lead = B["top_links"][0]
+anc = S["anchor"]
+comm = (f"{anc['communities_major']} major communities (plus {anc['small_groups']} small groups and {anc['isolates']} isolate{'s' if anc['isolates'] != 1 else ''})"
+        if "communities_major" in anc else f"{anc['communities']} communities")
+rab = D["crypto_cross_rate_ab"]
+bi = S["months"].index(D["baseline_month"])
+sw = D.get("starwars")
 
 SCENES = [
-    ("01_discover", 8, f"The Community Atlas: {clean / 1e6:.1f}M Reddit comments, {S['subreddits']} subreddits, {len(S['months'])} months. What really connects these communities?"),
-    ("02_atlas_raw", 8, f"Raw overlap: {100 * S['cosine_density']['all']:.2f}% of subreddit pairs share at least one commenter. The map is a hairball dominated by size."),
-    ("03_atlas_adjusted", 9, f"Adjusted: only pairs that share far more commenters than size and activity predict ({100 * S['validated_density']['all']:.1f}%). {S['anchor']['communities']} communities appear."),
-    ("04_atlas_selected", 9, f"Select r/{A['example']}: its strongest surprising overlaps, with shared vs expected commenters for each."),
-    ("06_story_popularity_example", 9, f"Story 1: hubs make up {100 * A['hub_share_cosine']:.0f}% of a topical subreddit's closest neighbours by raw overlap, {100 * A['hub_share_affinity']:.0f}% after adjustment."),
-    ("07_story_neighbours", 9, f"Story 2: r/{lead['a']} and r/{lead['b']} share {lead['shared_all']:,} commenters where {lead['expected_all']:,.0f} were expected."),
-    ("08_story_connectors", 8, f"Story 3: connectors such as r/{C['connectors'][0]['name']} and r/{C['connectors'][1]['name']} link many communities; giant hubs do not."),
-    ("09_story_crowds_timeline", 9, "Story 4: crypto commenters peak with Bitcoin's price in Dec 2017, then fall steeply while Reddit grows."),
-    ("10_story_crowds_peak", 7, f"At the peak, r/Bitcoin–r/CryptoCurrency affinity is {cp[S['months'].index(D['baseline_month'])]}×..."),
-    ("11_story_crowds_after", 8, f"...and {cp[-1]}× by Sep 2018: the crowd left, and the remaining audience overlaps far more."),
-    ("12_story_marvel", 8, f"The Infinity War crowd did the opposite: Marvel affinity fell to {mv[S['months'].index('2018-04')]}× in April 2018. Association, not causation."),
+    ("01_start", 8, f"Two communities share thousands of commenters. Are their audiences unusually connected? {clean / 1e6:.1f}M comments, {S['subreddits']} subreddits, {len(S['months'])} months."),
+    ("02_start_raw", 8, f"Link every pair that shares a commenter: {100 * S['cosine_density']['all']:.2f}% of pairs connect. One person active in many places links all of them."),
+    ("05_atlas_surprise", 8, "Ask what chance would produce: grey lines share about what size and activity predict; coloured lines share far more."),
+    ("03_atlas_adjusted", 9, f"Keep only the surprising: {100 * S['validated_density']['all']:.1f}% of pairs, {comm}."),
+    ("04_atlas_selected", 9, f"Open r/{A['example']}: its strongest surprising overlaps, with shared vs expected commenters for each."),
+    ("12_story_takeaway", 9, f"Each discovery ends with a takeaway: hubs are {100 * A['hub_share_cosine']:.0f}% of a topical subreddit's closest neighbours by raw overlap, {100 * A['hub_share_affinity']:.0f}% after adjustment."),
+    ("07_story_neighbours", 9, f"Discovery 2: r/{lead['a']} and r/{lead['b']} share {lead['shared_all']:,} commenters where {lead['expected_all']:,.0f} were expected; the same test also finds audiences that keep apart."),
+    ("08_story_connectors", 8, f"Discovery 3: connectors such as r/{C['connectors'][0]['name']} and r/{C['connectors'][1]['name']} reach many clusters; r/{C['giants']['name']} keeps every surprising link inside its own."),
+    ("09_story_crowds_timeline", 9, "Discovery 4: crypto commenters peak with Bitcoin's price in Dec 2017, then fall steeply while Reddit grows."),
+    ("10_story_crowds_peak", 7, f"The obvious reading: r/Bitcoin–r/CryptoCurrency affinity goes from {cp[bi]}× at the peak to {cp[-1]}× by Sep 2018..."),
+    ("11_story_crowds_after", 9, f"...the careful one: the share of r/Bitcoin commenters also in r/CryptoCurrency moved only {100 * rab[bi]:.0f}% → {100 * rab[-1]:.0f}%. The ratio rose because the expectation shrank with the communities."),
+    ("21_story_crowds_starwars", 8, f"A crowd arriving: The Last Jedi took r/StarWars to {sw['dec_over_nov']:.2f}× its November commenters; affinity with its fandom neighbours dipped and recovered." if sw else "A crowd arriving shows the same arithmetic in reverse."),
+    ("22_story_crowds_marvel", 8, f"Infinity War doubled r/marvelstudios' weekly commenters; r/marvelstudios–r/Marvel affinity fell to {mv[S['months'].index('2018-04')]}× in April 2018 while cross-posting rose. Association, not causation."),
     ("13_explore_profile", 8, "Explore any subreddit: surprising vs raw neighbours, weekly activity and monthly relationship trends."),
     ("14_compare_pair", 8, "Compare two communities across months and quarters, with significance marked."),
     ("15_compare_periods", 8, "Compare two periods: links that appeared (blue) and disappeared (orange), against normal month-to-month churn."),
-    ("16_methods", 9, "Methods & data: scope, cleaning, the BiCM null model, validation against the reference code, limitations and downloads."),
+    ("16_pipeline_expected", 9, "How it's made: nine stages with real counts, a worked example, the tests that guard each step, and what is precomputed versus computed in the browser."),
+    ("18_about", 8, f"Scope & limits: one sample of {S['subreddits']} subreddits, {len(S['months'])} months, comments only. Associations, not causes; co-presence, not conversation."),
 ]
 
 

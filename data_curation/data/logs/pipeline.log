@@ -57,12 +57,12 @@
 2026-09-28 17:22:22,415 | INFO    | 2018Q1: 1,834,018 rows written -> 2018Q1.parquet (complete)
 2026-09-28 17:22:22,440 | INFO    | TEST MODE run finished -- coverage_report.csv NOT updated (test output doesn't belong in the real coverage record).
 2026-09-28 17:22:22,440 | INFO    | >>> STAGE 2: CLEAN
-2026-09-28 17:22:22,452 | WARNING | No raw quarters found in C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\raw -- run fetch.py first
+2026-09-28 17:22:22,452 | WARNING | No raw quarters found in <repo>\data_curation\data\raw -- run fetch.py first
 2026-09-28 17:22:22,456 | INFO    | ======================================================================
 2026-09-28 17:22:22,458 | INFO    | PIPELINE COMPLETE in 2.3 minutes
 2026-09-28 17:22:22,458 | INFO    |   Fetched : 1/1 quarters
 2026-09-28 17:22:22,458 | INFO    |   Cleaned : 0/0 quarters
-2026-09-28 17:22:22,458 | INFO    |   Reports : C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\coverage_report.csv, C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\cleaning_report.csv
+2026-09-28 17:22:22,458 | INFO    |   Reports : <repo>\data_curation\data\logs\coverage_report.csv, <repo>\data_curation\data\logs\cleaning_report.csv
 2026-09-28 17:22:22,458 | INFO    |   Next    : streamlit run dashboard.py
 2026-09-28 17:22:22,458 | INFO    | ======================================================================
 2026-09-28 17:24:13,801 | INFO    |   manual_review_2018Q1.csv: reusing 200 existing manual verdict(s)
@@ -121,16 +121,16 @@
 2026-10-05 15:53:10,003 | INFO    |     progress: 165/193 shards done this month, 52,486,517 rows staged so far
 2026-10-05 15:54:23,165 | INFO    | [2018Q1] frame coverage: 170/170 subreddits observed
 2026-10-05 15:54:28,181 | INFO    | 2018Q1: 55,248,128 rows written -> 2018Q1.parquet (complete)
-2026-10-05 15:54:28,925 | INFO    | Coverage report written to C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\coverage_report.csv
+2026-10-05 15:54:28,925 | INFO    | Coverage report written to <repo>\data_curation\data\logs\coverage_report.csv
 2026-10-05 15:54:28,925 | INFO    | >>> STAGE 2: CLEAN
 2026-10-05 15:54:44,330 | INFO    |   manual review candidates written to manual_review_2018Q1.csv (0/200 verdicts recorded)
 2026-10-05 15:55:10,541 | INFO    | 2018Q1: 55,248,128 -> 52,118,250 rows (94.3% kept) | 2919421 -> 1215022 users | 5 hard-bot removed | 200 flagged for manual review | 0 rows removed by manual verdict (no verdicts recorded yet)
-2026-10-05 15:55:10,895 | INFO    | Cleaning report written to C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\cleaning_report.csv
+2026-10-05 15:55:10,895 | INFO    | Cleaning report written to <repo>\data_curation\data\logs\cleaning_report.csv
 2026-10-05 15:55:10,895 | INFO    | ======================================================================
 2026-10-05 15:55:10,895 | INFO    | PIPELINE COMPLETE in 27.8 minutes
 2026-10-05 15:55:10,896 | INFO    |   Fetched : 1/1 quarters
 2026-10-05 15:55:10,896 | INFO    |   Cleaned : 1/1 quarters
-2026-10-05 15:55:10,896 | INFO    |   Reports : C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\coverage_report.csv, C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\cleaning_report.csv
+2026-10-05 15:55:10,896 | INFO    |   Reports : <repo>\data_curation\data\logs\coverage_report.csv, <repo>\data_curation\data\logs\cleaning_report.csv
 2026-10-05 15:55:10,896 | INFO    |   Next    : streamlit run dashboard.py
 2026-10-05 15:55:10,896 | INFO    | ======================================================================
 2026-10-05 15:55:27,650 | INFO    | ======================================================================
@@ -170,7 +170,7 @@
 2026-10-05 16:50:40,731 | INFO    |     progress: 165/209 shards done this month, 54,891,290 rows staged so far
 2026-10-05 16:52:48,416 | INFO    | [2018Q3] frame coverage: 170/170 subreddits observed
 2026-10-05 16:53:02,488 | INFO    | 2018Q3: 59,053,604 rows written -> 2018Q3.parquet (complete)
-2026-10-05 16:53:10,878 | INFO    | Coverage report written to C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\coverage_report.csv
+2026-10-05 16:53:10,878 | INFO    | Coverage report written to <repo>\data_curation\data\logs\coverage_report.csv
 2026-10-05 16:53:10,900 | INFO    | >>> STAGE 2: CLEAN
 2026-10-05 16:53:43,552 | INFO    |   manual review candidates written to manual_review_2018Q1.csv (0/200 verdicts recorded)
 2026-10-05 16:54:14,894 | INFO    | 2018Q1: 55,248,128 -> 52,118,250 rows (94.3% kept) | 2919421 -> 1215022 users | 5 hard-bot removed | 200 flagged for manual review | 0 rows removed by manual verdict (no verdicts recorded yet)
@@ -178,15 +178,15 @@
 2026-10-05 16:55:17,962 | INFO    | 2018Q2: 57,301,138 -> 54,002,756 rows (94.2% kept) | 3069238 -> 1279269 users | 5 hard-bot removed | 200 flagged for manual review | 0 rows removed by manual verdict (no verdicts recorded yet)
 2026-10-05 16:55:52,033 | INFO    |   manual review candidates written to manual_review_2018Q3.csv (0/200 verdicts recorded)
 2026-10-05 16:56:43,451 | INFO    | 2018Q3: 59,053,604 -> 55,570,837 rows (94.1% kept) | 3248860 -> 1339394 users | 0 hard-bot removed | 200 flagged for manual review | 0 rows removed by manual verdict (no verdicts recorded yet)
-2026-10-05 16:56:44,404 | INFO    | Cleaning report written to C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\cleaning_report.csv
+2026-10-05 16:56:44,404 | INFO    | Cleaning report written to <repo>\data_curation\data\logs\cleaning_report.csv
 2026-10-05 16:56:44,407 | INFO    | ======================================================================
 2026-10-05 16:56:44,407 | INFO    | PIPELINE COMPLETE in 61.3 minutes
 2026-10-05 16:56:44,411 | INFO    |   Fetched : 2/2 quarters
 2026-10-05 16:56:44,411 | INFO    |   Cleaned : 3/3 quarters
-2026-10-05 16:56:44,412 | INFO    |   Reports : C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\coverage_report.csv, C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\cleaning_report.csv
+2026-10-05 16:56:44,412 | INFO    |   Reports : <repo>\data_curation\data\logs\coverage_report.csv, <repo>\data_curation\data\logs\cleaning_report.csv
 2026-10-05 16:56:44,412 | INFO    |   Next    : streamlit run dashboard.py
 2026-10-05 16:56:44,412 | INFO    | ======================================================================
-2026-10-05 16:57:28,314 | INFO    | Coverage report written to C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\coverage_report.csv
+2026-10-05 16:57:28,314 | INFO    | Coverage report written to <repo>\data_curation\data\logs\coverage_report.csv
 2026-10-28 04:57:34,437 | INFO    | Fetching 1 quarters: 2017Q4 .. 2017Q4
 2026-10-28 04:57:34,438 | INFO    | Sampling frame: 170 subreddits
 2026-10-28 04:57:34,438 | INFO    | === 2017Q4 ===
@@ -204,9 +204,9 @@
 2026-10-28 05:16:01,930 | INFO    |     progress: 165/172 shards done this month, 50,939,074 rows staged so far
 2026-10-28 05:16:19,155 | INFO    | [2017Q4] frame coverage: 170/170 subreddits observed
 2026-10-28 05:16:25,354 | INFO    | 2017Q4: 51,616,108 rows written -> 2017Q4.parquet (complete)
-2026-10-28 05:16:26,630 | INFO    | Coverage report written to C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\coverage_report.csv
+2026-10-28 05:16:26,630 | INFO    | Coverage report written to <repo>\data_curation\data\logs\coverage_report.csv
 2026-10-28 05:16:26,632 | INFO    | DONE. 1 complete, 0 partial, 0 with no data.
 2026-10-28 05:16:40,935 | INFO    |   manual review candidates written to manual_review_2017Q4.csv (0/200 verdicts recorded)
 2026-10-28 05:17:06,419 | INFO    | 2017Q4: 51,616,108 -> 48,633,963 rows (94.2% kept) | 2763494 -> 1144505 users | 5 hard-bot removed | 200 flagged for manual review | 0 rows removed by manual verdict (no verdicts recorded yet)
-2026-10-28 05:17:06,778 | INFO    | Cleaning report written to C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\cleaning_report.csv
+2026-10-28 05:17:06,778 | INFO    | Cleaning report written to <repo>\data_curation\data\logs\cleaning_report.csv
 2026-10-28 05:17:06,779 | INFO    | DONE. 1/1 quarters cleaned successfully.

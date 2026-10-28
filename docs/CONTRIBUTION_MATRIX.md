@@ -16,6 +16,9 @@ The V1-phase rows come from the team's earlier report draft. **The Atlas-phase r
 | Atlas data builder and stories (`atlas/build_atlas.py`) | *to confirm* | *to confirm* |
 | Atlas web application (`atlas/web/`) | *to confirm* | *to confirm* |
 | Literature review and final report (`docs/FINAL_REPORT.md`) | *to confirm* | *to confirm* |
+| V2 narrative redesign: Start, Discoveries, guided tour, How it's made (`atlas/web/assets/`) | *to confirm* | *to confirm* |
+| Lower-tail (fewer-than-chance) test, pipeline facts and revised story metrics (`network_analysis/affinity.py`, `atlas/build_atlas.py`) | *to confirm* | *to confirm* |
+| Truth audit of the findings and the revised report text (`tools/build_docs.py`, `docs/V2_DESIGN_DECISIONS.md`) | *to confirm* | *to confirm* |
 | Presentation, demo script and video | *to confirm* | *to confirm* |
 
 ● lead · ◐ supporting. AI assistance (Claude) was used for code, analysis and drafting under the team's direction. Disclose this according to the university's AI policy.

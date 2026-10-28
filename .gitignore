@@ -19,3 +19,6 @@ data_curation/data/raw_TEST/
 
 # Deck builder dependencies
 tools/deck/node_modules/
+
+# local tool configuration (Claude Code preview server etc.)
+.claude/
