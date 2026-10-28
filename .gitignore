@@ -14,3 +14,5 @@ data_curation/data/logs/manual_review_*.csv
 # Test-mode fetch output and local tool caches.
 data_curation/data/raw_TEST/
 .pytest_cache/
+# DuckDB spill directory
+.tmp/

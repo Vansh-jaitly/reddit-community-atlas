@@ -38,6 +38,7 @@ from network_analysis.community import (
     seed_agreement,
     resolution_profile,
     networkx_to_igraph,
+    weighted_modularity,
     _partition_class,
 )
 from network_analysis.brokerage import compute_participation_coefficients
@@ -109,10 +110,10 @@ def run(quarters: list[str] | None = None, alpha: float = 0.3,
     anchor_seed_audit = seed_agreement(anchor_seed_parts)
     anchor_partition = anchor_seed_parts[0]
     _ig_pool, _ = networkx_to_igraph(G_pool)
-    anchor_mod = float(leidenalg.find_partition(
+    anchor_mod = weighted_modularity(_ig_pool, leidenalg.find_partition(
         _ig_pool, _partition_class("modularity"),
         resolution_parameter=PRIMARY_GAMMA,
-        weights="weight", seed=PRIMARY_SEEDS[0]).modularity)
+        weights="weight", seed=PRIMARY_SEEDS[0]).membership)
     anchor_res = PRIMARY_GAMMA
     anchor_res_profile = resolution_profile(G_pool)
     # Visualization-only backbone (never feeds inference).
@@ -143,10 +144,10 @@ def run(quarters: list[str] | None = None, alpha: float = 0.3,
         q_seed_audit = seed_agreement(q_seed_parts)
         q_partition = q_seed_parts[0]
         _ig_q, _ = networkx_to_igraph(G_q)
-        q_mod = float(leidenalg.find_partition(
+        q_mod = weighted_modularity(_ig_q, leidenalg.find_partition(
             _ig_q, _partition_class("modularity"),
             resolution_parameter=PRIMARY_GAMMA,
-            weights="weight", seed=PRIMARY_SEEDS[0]).modularity)
+            weights="weight", seed=PRIMARY_SEEDS[0]).membership)
         q_res = PRIMARY_GAMMA
         q_res_profile = resolution_profile(G_q)
         G_q_viz = disparity_filter(G_q, alpha=VIZ_ALPHA)

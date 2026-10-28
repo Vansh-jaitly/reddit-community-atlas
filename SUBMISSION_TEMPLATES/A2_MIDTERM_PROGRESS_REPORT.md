@@ -1,5 +1,10 @@
 # A2 Evaluation — Mid-Term Progress Report & Prototype Demo
 
+> **Correction (final submission).** This is the historical mid-term template. The preliminary figures in §3
+> (≈98.4% retention, ≈3.8% multi-subreddit users) were not reproduced by the final pipeline. The verified
+> numbers are in `docs/FINAL_REPORT.md` (e.g. 94.22% of comments retained, 2018 Q1–Q3 + 2017 Q4, 170 subreddits).
+
+
 **Course Code**: CSE3729 — Computational Social Media Analysis  
 **Project Title**: Are Bridge Positions Between Reddit Communities More Persistent Across Quarters Than the Individual Users Occupying Them?  
 

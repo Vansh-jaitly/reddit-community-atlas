@@ -1,0 +1,35 @@
+{
+  "note": "V1 stored unweighted modularity; weighted_q is the quality of the same partitions on the weighted cosine graph they were optimised on. network_results.json is left unchanged.",
+  "anchor_pooled": {
+    "communities": 4,
+    "stored_unweighted_q": -0.0043,
+    "weighted_q": 0.1092,
+    "shuffled_label_weighted_q_mean": -0.0065,
+    "shuffled_label_weighted_q_max": -0.0002,
+    "density": 0.9999
+  },
+  "2018Q1": {
+    "communities": 4,
+    "stored_unweighted_q": -0.0041,
+    "weighted_q": 0.1251,
+    "shuffled_label_weighted_q_mean": -0.0068,
+    "shuffled_label_weighted_q_max": -0.0008,
+    "density": 0.9985
+  },
+  "2018Q2": {
+    "communities": 4,
+    "stored_unweighted_q": -0.0043,
+    "weighted_q": 0.129,
+    "shuffled_label_weighted_q_mean": -0.0067,
+    "shuffled_label_weighted_q_max": 0.0003,
+    "density": 0.9993
+  },
+  "2018Q3": {
+    "communities": 4,
+    "stored_unweighted_q": -0.0038,
+    "weighted_q": 0.1273,
+    "shuffled_label_weighted_q_mean": -0.0064,
+    "shuffled_label_weighted_q_max": 0.0037,
+    "density": 0.9986
+  }
+}

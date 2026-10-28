@@ -382,11 +382,18 @@ def write_cleaning_report(results: list[dict]) -> None:
     path = C.DATA_LOGS / "cleaning_report.csv"
     fields = ["quarter", "status", "rows_raw", "rows_clean", "users_raw",
               "users_clean", "hard_bots_removed", "manual_review_flagged"]
+    # Merge by quarter: rewriting with only this run's quarters would silently
+    # drop earlier rows (same failure write_coverage_report guards against).
+    rows = {}
+    if path.exists():
+        with open(path, newline="") as f:
+            rows = {r["quarter"]: r for r in csv.DictReader(f)}
+    rows.update({r["quarter"]: r for r in results})
     with open(path, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
         w.writeheader()
-        for r in results:
-            w.writerow(r)
+        for q in sorted(rows):
+            w.writerow(rows[q])
     log.info("Cleaning report written to %s", path)
 
 

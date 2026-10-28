@@ -187,3 +187,26 @@
 2026-10-05 16:56:44,412 | INFO    |   Next    : streamlit run dashboard.py
 2026-10-05 16:56:44,412 | INFO    | ======================================================================
 2026-10-05 16:57:28,314 | INFO    | Coverage report written to C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\coverage_report.csv
+2026-10-28 04:57:34,437 | INFO    | Fetching 1 quarters: 2017Q4 .. 2017Q4
+2026-10-28 04:57:34,438 | INFO    | Sampling frame: 170 subreddits
+2026-10-28 04:57:34,438 | INFO    | === 2017Q4 ===
+2026-10-28 04:58:02,989 | INFO    |   2017-10: 172 shards found, in batches of 15
+2026-10-28 04:58:31,074 | INFO    |     progress: 15/172 shards done this month, 1,489,387 rows staged so far
+2026-10-28 05:00:55,599 | INFO    |     progress: 90/172 shards done this month, 8,721,490 rows staged so far
+2026-10-28 05:03:17,852 | INFO    |     progress: 165/172 shards done this month, 15,874,554 rows staged so far
+2026-10-28 05:04:11,863 | INFO    |   2017-11: 170 shards found, in batches of 15
+2026-10-28 05:04:40,987 | INFO    |     progress: 15/170 shards done this month, 18,029,068 rows staged so far
+2026-10-28 05:07:41,651 | INFO    |     progress: 90/170 shards done this month, 25,596,231 rows staged so far
+2026-10-28 05:10:06,999 | INFO    |     progress: 165/170 shards done this month, 32,873,467 rows staged so far
+2026-10-28 05:10:50,105 | INFO    |   2017-12: 172 shards found, in batches of 15
+2026-10-28 05:11:16,768 | INFO    |     progress: 15/172 shards done this month, 34,917,300 rows staged so far
+2026-10-28 05:13:37,714 | INFO    |     progress: 90/172 shards done this month, 42,793,016 rows staged so far
+2026-10-28 05:16:01,930 | INFO    |     progress: 165/172 shards done this month, 50,939,074 rows staged so far
+2026-10-28 05:16:19,155 | INFO    | [2017Q4] frame coverage: 170/170 subreddits observed
+2026-10-28 05:16:25,354 | INFO    | 2017Q4: 51,616,108 rows written -> 2017Q4.parquet (complete)
+2026-10-28 05:16:26,630 | INFO    | Coverage report written to C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\coverage_report.csv
+2026-10-28 05:16:26,632 | INFO    | DONE. 1 complete, 0 partial, 0 with no data.
+2026-10-28 05:16:40,935 | INFO    |   manual review candidates written to manual_review_2017Q4.csv (0/200 verdicts recorded)
+2026-10-28 05:17:06,419 | INFO    | 2017Q4: 51,616,108 -> 48,633,963 rows (94.2% kept) | 2763494 -> 1144505 users | 5 hard-bot removed | 200 flagged for manual review | 0 rows removed by manual verdict (no verdicts recorded yet)
+2026-10-28 05:17:06,778 | INFO    | Cleaning report written to C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\cleaning_report.csv
+2026-10-28 05:17:06,779 | INFO    | DONE. 1/1 quarters cleaned successfully.

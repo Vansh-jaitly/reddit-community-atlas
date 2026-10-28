@@ -1,0 +1,22 @@
+{
+  "quarter": "2018Q1",
+  "sample_users": 150000,
+  "subreddits": 170,
+  "links": 797407,
+  "alpha": 0.01,
+  "fit_max_abs_prob_difference": 1.136699478987424e-08,
+  "pvalue_median_abs_log10_difference": 7.479628136471128e-12,
+  "validated_ours": 952,
+  "validated_reference": 952,
+  "validated_jaccard": 1.0,
+  "only_ours": 0,
+  "only_reference": 0,
+  "exact_poisson_binomial_pairs_checked": 300,
+  "exact_decision_flips": 22,
+  "exact_flips_gained": 22,
+  "exact_flips_lost": 0,
+  "exact_flips_share_of_validated": 0.023109243697478993,
+  "seconds_ours": 0.2,
+  "seconds_reference": 57.3,
+  "bicm_version": "3.4.0"
+}

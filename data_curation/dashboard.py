@@ -39,7 +39,7 @@ from network_analysis.brokerage import compute_participation_coefficients
 
 # Page Config
 st.set_page_config(
-    page_title="Bridge Brokers | Data Curation Studio",
+    page_title="Community Atlas | Data & Pipeline Console",
     page_icon="🌉",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -381,7 +381,7 @@ def get_user_subreddit_breakdown(parquet_path_str: str, author_h: str):
 st.markdown(
     """
     <div class="main-header">
-        <h1>🌉 Reddit Bridge Brokers — Data Curation Dashboard</h1>
+        <h1>🗂️ Community Atlas — Data &amp; Pipeline Console</h1>
         <p>Data quality pipeline monitor, bot cascade audit suite, and interactive cross-community analytics studio.</p>
     </div>
     """,
@@ -799,6 +799,12 @@ with tab_explorer:
 # ============================================================ TAB 5: NETWORK & COMMUNITIES
 with tab_network:
     st.subheader("🕸️ Interactive 2D Network Graph & Community Structure Visualizer")
+    st.warning(
+        "This tab shows the **V1 baseline** (cosine projection + Serrano display backbone), kept for the project "
+        "history. The final relationship map is the **Community Atlas** (`python atlas/serve.py`), which uses the "
+        "activity-adjusted BiCM affinity network. V1's stored modularity is unweighted; see "
+        "`data_curation/data/logs/v1_modularity_audit.json` for the weighted values."
+    )
 
     net_res = load_network_results()
 

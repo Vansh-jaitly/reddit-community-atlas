@@ -1,0 +1,171 @@
+Id,Label,category,community,community_label,participation,x,y
+3Dprinting,3Dprinting,hobby,5,"Tech, science & ideas",0.438,-48.9,504.6
+Accounting,Accounting,finance,4,Money & work,0.32,395.1,206.9
+ADHD,ADHD,support,2,Support & health,0.077,365.4,-329.4
+Anarchism,Anarchism,politics_news,3,Politics & news,0.201,-28.2,88.9
+anime,anime,media,7,anime · manga,0.108,909.7,-205.6
+Anxiety,Anxiety,support,2,Support & health,0.059,372.7,-293.5
+Aquariums,Aquariums,hobby,1,Hobbies & lifestyle,0.0,-118.5,-655.4
+Art,Art,media,0,Front page & entertainment,0.044,-518.3,92.7
+AskDocs,AskDocs,expertise,2,Support & health,0.262,259.6,-266.9
+AskEngineers,AskEngineers,expertise,5,"Tech, science & ideas",0.528,20.8,446.6
+AskHistorians,AskHistorians,expertise,3,Politics & news,0.381,-36.7,180.2
+askphilosophy,askphilosophy,expertise,3,Politics & news,0.539,-79.1,98.9
+AskReddit,AskReddit,gateway,0,Front page & entertainment,0.0,-807.2,-189.4
+askscience,askscience,expertise,0,Front page & entertainment,0.598,-319.8,164.1
+audioengineering,audioengineering,expertise,1,Hobbies & lifestyle,0.061,-386.3,-735.9
+AustralianPolitics,AustralianPolitics,politics_news,3,Politics & news,0.534,68.6,48.6
+autism,autism,support,2,Support & health,0.205,319.0,-231.4
+aww,aww,gateway,0,Front page & entertainment,0.078,-695.3,63.4
+bicycling,bicycling,hobby,1,Hobbies & lifestyle,0.246,-166.6,-521.9
+bipolar,bipolar,support,2,Support & health,-0.0,370.2,-248.6
+BipolarReddit,BipolarReddit,support,2,Support & health,0.0,359.9,-272.8
+Bitcoin,Bitcoin,finance,4,Money & work,0.133,486.4,333.4
+BitcoinBeginners,BitcoinBeginners,finance,4,Money & work,0.0,514.4,340.5
+boardgames,boardgames,hobby,6,magicTCG · boardgames · custommagic,0.0,849.5,42.6
+books,books,media,0,Front page & entertainment,0.148,-464.1,4.1
+buildapc,buildapc,expertise,5,"Tech, science & ideas",0.0,141.4,676.3
+business,business,finance,4,Money & work,0.616,278.9,246.4
+CanadaPolitics,CanadaPolitics,politics_news,3,Politics & news,0.382,68.0,175.0
+CapitalismVSocialism,CapitalismVSocialism,politics_news,3,Politics & news,0.256,-12.8,102.3
+cats,cats,hobby,1,Hobbies & lifestyle,0.366,38.4,-705.6
+changemyview,changemyview,politics_news,3,Politics & news,0.295,-52.4,70.3
+chemistry,chemistry,expertise,5,"Tech, science & ideas",0.572,71.7,349.1
+chess,chess,hobby,5,"Tech, science & ideas",0.325,53.9,530.3
+childfree,childfree,support,1,Hobbies & lifestyle,0.587,190.6,-564.9
+ChronicPain,ChronicPain,support,2,Support & health,0.277,295.0,-257.8
+climbing,climbing,hobby,1,Hobbies & lifestyle,0.614,-92.0,-405.2
+Coffee,Coffee,hobby,1,Hobbies & lifestyle,0.0,-138.0,-488.2
+comics,comics,media,0,Front page & entertainment,0.459,-457.3,300.9
+Conservative,Conservative,politics_news,3,Politics & news,0.3,-61.4,178.9
+conspiracy,conspiracy,politics_news,3,Politics & news,0.281,-129.7,120.8
+Cooking,Cooking,hobby,1,Hobbies & lifestyle,0.235,-21.6,-441.8
+CPTSD,CPTSD,support,2,Support & health,0.199,335.4,-259.8
+crochet,crochet,hobby,1,Hobbies & lifestyle,0.452,60.8,-515.9
+CrohnsDisease,CrohnsDisease,support,2,Support & health,0.0,285.7,-206.0
+CryptoCurrency,CryptoCurrency,finance,4,Money & work,0.041,488.5,362.7
+custommagic,custommagic,hobby,6,magicTCG · boardgames · custommagic,0.424,731.9,-0.8
+dataisbeautiful,dataisbeautiful,gateway,0,Front page & entertainment,0.479,-401.4,138.7
+democrats,democrats,politics_news,3,Politics & news,0.505,-80.0,158.6
+depression,depression,support,2,Support & health,0.0,429.9,-305.5
+Divorce,Divorce,support,2,Support & health,0.291,355.0,-385.0
+DIY,DIY,hobby,0,Front page & entertainment,0.447,-395.8,28.8
+Documentaries,Documentaries,media,0,Front page & entertainment,0.436,-419.0,109.2
+dogecoin,dogecoin,finance,4,Money & work,0.369,494.5,282.7
+dogs,dogs,hobby,1,Hobbies & lifestyle,0.452,131.5,-633.8
+Economics,Economics,finance,3,Politics & news,0.652,29.8,167.4
+EngineeringStudents,EngineeringStudents,expertise,5,"Tech, science & ideas",0.352,17.6,485.0
+Entrepreneur,Entrepreneur,finance,4,Money & work,0.324,325.5,275.7
+ethereum,ethereum,finance,4,Money & work,0.289,451.8,330.2
+femalefashionadvice,femalefashionadvice,media,1,Hobbies & lifestyle,0.358,48.4,-563.0
+financialindependence,financialindependence,finance,4,Money & work,0.348,312.7,207.1
+Fitness,Fitness,hobby,1,Hobbies & lifestyle,0.276,84.8,-687.8
+Frugal,Frugal,finance,1,Hobbies & lifestyle,0.738,24.3,-301.3
+funny,funny,gateway,0,Front page & entertainment,0.035,-678.6,156.0
+gardening,gardening,hobby,1,Hobbies & lifestyle,0.364,-75.9,-474.1
+geopolitics,geopolitics,politics_news,3,Politics & news,0.366,11.0,129.2
+Guitar,Guitar,hobby,1,Hobbies & lifestyle,0.13,-420.3,-714.6
+hardware,hardware,expertise,5,"Tech, science & ideas",0.403,130.9,560.1
+harrypotter,harrypotter,media,0,Front page & entertainment,0.262,-637.2,419.1
+hiphopheads,hiphopheads,media,1,Hobbies & lifestyle,0.156,-667.9,-596.3
+ibs,ibs,support,2,Support & health,0.33,290.9,-235.3
+immigration,immigration,politics_news,4,Money & work,0.66,359.0,34.8
+Insurance,Insurance,finance,4,Money & work,0.341,361.8,117.4
+interestingasfuck,interestingasfuck,gateway,0,Front page & entertainment,0.327,-526.3,289.5
+inthenews,inthenews,politics_news,3,Politics & news,0.503,7.0,107.8
+investing,investing,finance,4,Money & work,0.311,345.9,252.4
+jobs,jobs,finance,4,Money & work,0.515,425.1,130.6
+knitting,knitting,hobby,1,Hobbies & lifestyle,0.405,39.6,-528.1
+kpop,kpop,media,2,Support & health,0.454,488.3,-108.1
+learnprogramming,learnprogramming,expertise,5,"Tech, science & ideas",0.244,182.9,509.5
+lego,lego,hobby,0,Front page & entertainment,0.369,-506.6,501.0
+Libertarian,Libertarian,politics_news,3,Politics & news,0.446,-72.0,144.5
+LifeProTips,LifeProTips,gateway,0,Front page & entertainment,0.161,-472.8,78.0
+linux,linux,expertise,5,"Tech, science & ideas",0.18,154.6,510.8
+lonely,lonely,support,2,Support & health,0.111,427.7,-252.4
+magicTCG,magicTCG,hobby,6,magicTCG · boardgames · custommagic,0.0,773.8,5.7
+MakeupAddiction,MakeupAddiction,media,1,Hobbies & lifestyle,0.323,55.2,-611.3
+manga,manga,media,7,anime · manga,0.253,882.5,-232.3
+Marvel,Marvel,media,0,Front page & entertainment,0.07,-582.7,473.4
+marvelstudios,marvelstudios,media,0,Front page & entertainment,0.29,-556.7,434.2
+math,math,expertise,5,"Tech, science & ideas",0.422,80.4,440.5
+medicalschool,medicalschool,expertise,2,Support & health,0.167,203.2,-178.7
+medicine,medicine,expertise,2,Support & health,0.405,198.8,-206.8
+mentalhealth,mentalhealth,support,2,Support & health,0.072,379.0,-271.3
+migraine,migraine,support,2,Support & health,0.363,287.9,-282.0
+mildlyinfuriating,mildlyinfuriating,gateway,0,Front page & entertainment,0.402,-502.5,329.6
+mildlyinteresting,mildlyinteresting,gateway,0,Front page & entertainment,0.031,-601.0,156.4
+movies,movies,media,0,Front page & entertainment,0.161,-547.1,252.6
+Music,Music,media,0,Front page & entertainment,0.189,-551.1,69.1
+neoliberal,neoliberal,politics_news,3,Politics & news,0.362,-33.7,139.7
+news,news,politics_news,0,Front page & entertainment,0.472,-418.9,209.9
+newsokunomoral,newsokunomoral,politics_news,2,Support & health,0.697,278.1,-133.3
+NoStupidQuestions,NoStupidQuestions,gateway,0,Front page & entertainment,0.594,-382.3,489.9
+nottheonion,nottheonion,gateway,0,Front page & entertainment,0.389,-451.8,151.8
+nutrition,nutrition,expertise,1,Hobbies & lifestyle,0.481,90.4,-549.6
+OCD,OCD,support,2,Support & health,0.062,348.1,-238.0
+oddlysatisfying,oddlysatisfying,gateway,0,Front page & entertainment,0.283,-595.1,305.6
+offmychest,offmychest,support,2,Support & health,0.122,471.5,-392.9
+OldSchoolCool,OldSchoolCool,media,0,Front page & entertainment,0.184,-530.7,131.8
+options,options,finance,4,Money & work,0.163,364.4,264.2
+Parenting,Parenting,support,2,Support & health,0.57,318.5,-415.6
+personalfinance,personalfinance,finance,4,Money & work,0.572,229.3,158.0
+PersonalFinanceCanada,PersonalFinanceCanada,finance,4,Money & work,0.496,244.7,254.1
+philosophy,philosophy,expertise,0,Front page & entertainment,0.538,-355.6,102.4
+photography,photography,hobby,1,Hobbies & lifestyle,0.382,-314.8,-516.9
+Physics,Physics,expertise,5,"Tech, science & ideas",0.566,44.4,411.8
+pics,pics,gateway,0,Front page & entertainment,0.141,-617.3,193.5
+PoliticalDiscussion,PoliticalDiscussion,politics_news,3,Politics & news,0.26,-16.4,154.9
+PoliticalHumor,PoliticalHumor,politics_news,3,Politics & news,0.502,-132.7,177.8
+politics,politics,politics_news,3,Politics & news,0.345,-77.5,238.1
+programming,programming,expertise,5,"Tech, science & ideas",0.47,146.5,483.7
+PropagandaPosters,PropagandaPosters,politics_news,3,Politics & news,0.478,-83.3,130.2
+PublicFreakout,PublicFreakout,gateway,0,Front page & entertainment,0.527,-364.4,257.7
+PurplePillDebate,PurplePillDebate,politics_news,3,Politics & news,0.514,49.5,12.8
+Python,Python,expertise,5,"Tech, science & ideas",0.345,155.4,466.3
+RealEstate,RealEstate,finance,4,Money & work,0.269,338.1,199.2
+relationship_advice,relationship_advice,support,2,Support & health,0.342,459.1,-490.4
+RoastMe,RoastMe,gateway,8,RoastMe,0.0,1000.0,309.3
+running,running,hobby,1,Hobbies & lifestyle,0.0,-44.7,-617.0
+rust,rust,expertise,5,"Tech, science & ideas",0.246,168.6,436.4
+schizophrenia,schizophrenia,support,2,Support & health,0.18,352.7,-220.8
+science,science,expertise,0,Front page & entertainment,0.544,-368.5,146.9
+selfimprovement,selfimprovement,support,2,Support & health,0.683,385.3,-190.5
+ShitPoliticsSays,ShitPoliticsSays,politics_news,3,Politics & news,0.326,-35.0,117.9
+Showerthoughts,Showerthoughts,gateway,0,Front page & entertainment,0.03,-598.7,105.1
+SkincareAddiction,SkincareAddiction,media,1,Hobbies & lifestyle,0.395,89.0,-597.3
+smallbusiness,smallbusiness,finance,4,Money & work,0.264,317.8,251.0
+smoking,smoking,support,1,Hobbies & lifestyle,0.615,-49.0,-352.8
+Sneakers,Sneakers,media,1,Hobbies & lifestyle,0.0,-617.1,-637.0
+socialanxiety,socialanxiety,support,2,Support & health,0.013,420.0,-278.3
+socialism,socialism,politics_news,3,Politics & news,0.328,-58.0,116.3
+space,space,expertise,0,Front page & entertainment,0.395,-424.5,164.7
+starterpacks,starterpacks,gateway,0,Front page & entertainment,0.535,-382.8,318.2
+startups,startups,finance,4,Money & work,0.436,316.0,300.6
+StarWars,StarWars,media,0,Front page & entertainment,0.365,-511.5,443.4
+stocks,stocks,finance,4,Money & work,0.097,355.4,278.9
+stopdrinking,stopdrinking,support,2,Support & health,0.0,635.1,-472.0
+succulents,succulents,hobby,1,Hobbies & lifestyle,0.143,-40.6,-558.6
+suggestmeabook,suggestmeabook,media,0,Front page & entertainment,0.638,-461.5,-190.4
+SuicideWatch,SuicideWatch,support,2,Support & health,0.0,449.9,-281.2
+SwagBucks,SwagBucks,finance,2,Support & health,0.154,330.7,-142.8
+sysadmin,sysadmin,expertise,5,"Tech, science & ideas",0.0,185.2,579.9
+tattoos,tattoos,hobby,0,Front page & entertainment,0.483,-652.4,-47.8
+television,television,media,0,Front page & entertainment,0.285,-487.1,195.7
+thewallstreet,thewallstreet,finance,4,Money & work,0.106,378.5,283.2
+ThriftStoreHauls,ThriftStoreHauls,media,1,Hobbies & lifestyle,0.198,-65.6,-510.7
+tifu,tifu,gateway,0,Front page & entertainment,0.055,-508.2,47.9
+todayilearned,todayilearned,gateway,0,Front page & entertainment,0.298,-511.9,166.2
+travel,travel,hobby,1,Hobbies & lifestyle,0.591,-305.4,-442.5
+UKPersonalFinance,UKPersonalFinance,finance,3,Politics & news,0.304,123.9,70.5
+ukpolitics,ukpolitics,politics_news,3,Politics & news,0.058,51.1,94.5
+UpliftingNews,UpliftingNews,politics_news,0,Front page & entertainment,0.355,-454.0,124.0
+videos,videos,gateway,0,Front page & entertainment,0.105,-551.1,190.0
+vinyl,vinyl,media,1,Hobbies & lifestyle,0.176,-299.0,-655.4
+wallstreetbets,wallstreetbets,finance,4,Money & work,0.449,343.7,299.0
+webdev,webdev,expertise,5,"Tech, science & ideas",0.444,212.0,487.4
+woodworking,woodworking,hobby,1,Hobbies & lifestyle,0.605,-146.4,-290.3
+worldnews,worldnews,gateway,0,Front page & entertainment,0.506,-367.3,208.8
+worldpolitics,worldpolitics,politics_news,3,Politics & news,0.499,-50.3,152.6
+writing,writing,media,0,Front page & entertainment,0.378,-538.8,-200.1
+WritingPrompts,WritingPrompts,media,0,Front page & entertainment,-0.0,-542.5,-49.4

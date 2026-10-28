@@ -204,3 +204,24 @@ def test_over_pruned_backbone_warns(caplog):
     with caplog.at_level(logging.WARNING, logger="backbone"):
         disparity_filter(G, alpha=0.001)
     assert any("Disparity filter kept only" in r.message for r in caplog.records)
+
+
+def test_reported_modularity_uses_edge_weights():
+    """V1 reported leidenalg's unweighted `part.modularity`. On a complete graph
+    whose structure lives only in the weights, that value is ~0 for every
+    partition, while the weighted modularity the partition was optimised on is
+    clearly positive. The reported statistic must be the weighted one."""
+    import igraph as ig
+    from network_analysis.community import networkx_to_igraph, weighted_modularity
+
+    n = 12
+    G = nx.complete_graph(n)
+    for u, v in G.edges():
+        G[u][v]["weight"] = 1.0 if (u < 6) == (v < 6) else 0.05
+    partition, mod, _ = detect_communities_leiden(G, resolutions=[1.0], seeds_per_res=3)
+    ig_g, names = networkx_to_igraph(G)
+    membership = [partition[n_] for n_ in names]
+    assert len(set(membership)) == 2
+    assert ig_g.modularity(membership) <= 0          # unweighted: blind to the structure
+    assert mod == pytest.approx(weighted_modularity(ig_g, membership))
+    assert mod > 0.35

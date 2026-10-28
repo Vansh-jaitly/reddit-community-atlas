@@ -57,6 +57,18 @@ def networkx_to_igraph(G: nx.Graph) -> tuple[ig.Graph, list[str]]:
     return ig_g, nodes
 
 
+def weighted_modularity(ig_g: ig.Graph, membership: list[int], weight_attr: str = "weight") -> float:
+    """Modularity of `membership` using the edge weights the partition was optimised on.
+
+    leidenalg's `part.modularity` delegates to igraph's Graph.modularity()
+    WITHOUT weights. On the V1 cosine graph (99.85% dense) that unweighted
+    value is ~0 for any partition, which is why V1 reported Q = -0.004 for a
+    partition whose weighted modularity is +0.125 (see
+    data_curation/data/logs/v1_modularity_audit.json). Report this instead.
+    """
+    return float(ig_g.modularity(list(membership), weights=weight_attr))
+
+
 def _normalised_weights(ig_g: ig.Graph) -> list[float]:
     """Rescale edge weights to mean 1.
 
@@ -125,7 +137,7 @@ def detect_communities_leiden(
                 weights=weight_attr,
                 seed=seed,
             )
-            mod = float(part.modularity)
+            mod = weighted_modularity(ig_g, part.membership)
             if mod > best_modularity:
                 best_modularity = mod
                 best_partition = part
@@ -265,11 +277,11 @@ def resolution_profile(
         if partition_model == "cpm":
             weight_attr = "weight_norm"
             ig_g.es[weight_attr] = _normalised_weights(ig_g)
-        mod = float(leidenalg.find_partition(
+        mod = weighted_modularity(ig_g, leidenalg.find_partition(
             ig_g, _partition_class(partition_model),
             resolution_parameter=res,
             weights=weight_attr,
-            seed=seeds[0]).modularity)
+            seed=seeds[0]).membership)
         rows.append({
             "resolution": res,
             "n_communities": len(set(parts[0].values())),

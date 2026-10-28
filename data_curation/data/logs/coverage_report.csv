@@ -1,4 +1,5 @@
 quarter,status,rows,n_shard_batches_done,months_missing_from_source,months_skipped_by_request
+2017Q4,complete,51616108,36,,
 2018Q1,complete,55248128,38,,
 2018Q2,complete,57301138,42,,
 2018Q3,complete,59053604,44,,
