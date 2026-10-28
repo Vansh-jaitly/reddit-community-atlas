@@ -1,0 +1,16 @@
+.venv/
+**/__pycache__/
+*.pyc
+*.parquet
+*.duckdb
+data_curation/data/raw/
+data_curation/data/clean/
+data_curation/data/cache/
+.DS_Store
+# Private author-hash salt (never commit; see config.py).
+data_curation/salt.local
+# Bot-review files list salted author hashes: keep them local only.
+data_curation/data/logs/manual_review_*.csv
+# Test-mode fetch output and local tool caches.
+data_curation/data/raw_TEST/
+.pytest_cache/

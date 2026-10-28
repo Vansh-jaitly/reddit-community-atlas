@@ -1,0 +1,3 @@
+transition,possible_pairs,detected_bridge_pairs,shared_positions,width_jaccard,width_correlation,max_width,mean_width,status
+2018Q1 -> 2018Q2,6,6,6,0.4993,0.9996,5279,3928.0,descriptive-only (gates failed)
+2018Q2 -> 2018Q3,6,6,3,0.4991,0.9567,5604,4141.0,descriptive-only (gates failed)

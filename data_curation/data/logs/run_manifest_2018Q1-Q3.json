@@ -1,0 +1,152 @@
+{
+  "run_timestamp": "2026-10-05T11:43:23.435732+00:00",
+  "git_commit": "47bfb40fe2ed12af263803ce9a48d2c63287be67",
+  "git_dirty": true,
+  "source_archive": "hf://datasets/open-index/arctic/data/comments",
+  "source_snapshot": "live HTTP read 2026-10-05 (no versioned snapshot; probed shard counts recorded in fetch log)",
+  "collection_date": "2026-10-05",
+  "available_range_verified": "2018-01..2018-09 probed present (184/173/193/197/201/201/217/215/209 shards)",
+  "quarters": [
+    "2018Q1",
+    "2018Q2",
+    "2018Q3"
+  ],
+  "quarter_rule": "first three consecutive complete quarters available, all 170/170 frame coverage",
+  "frame": {
+    "n_total": 170,
+    "n_topical": 150,
+    "n_gateway": 20,
+    "sha256": "cafed87c033a3459",
+    "rule": "n_min>=2000 across 2018-01/2020-07/2022-08",
+    "selected_before_outcomes": true
+  },
+  "config": {
+    "gamma": 1.0,
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "min_width": 2,
+    "broker_percentile": 0.99,
+    "turnover_iterations": 1000,
+    "jaccard_threshold": 0.3,
+    "match_rate_gate": 0.6,
+    "coverage_gate": 0.8,
+    "seed_ari_gate": 0.6,
+    "viz_alpha": 0.3
+  },
+  "salt_fingerprint": "d1e66831818ea41a",
+  "cleaning": {
+    "min_comments": 5,
+    "min_subs": 1,
+    "bot_volume": 2000,
+    "bot_breadth_fraction": 0.5
+  },
+  "gates": {
+    "2018Q1 -> 2018Q2": {
+      "saturation": {
+        "value": 1.0,
+        "passed": false,
+        "on_fail": "no position-existence claim; width-only descriptive analysis"
+      },
+      "width_sparsity": {
+        "thin_buckets": 0,
+        "passed": true,
+        "on_fail": "no dose-response claim"
+      },
+      "partition_stability": {
+        "mean_seed_ari": 0.897,
+        "modularity_q": -0.0041,
+        "degenerate": false,
+        "passed": false,
+        "on_fail": "no partition-dependent longitudinal inference"
+      },
+      "temporal_mapping": {
+        "match_rate": 1.0,
+        "match_coverage": 1.0,
+        "passed": true,
+        "on_fail": "quarter-specific descriptive results only; NO tracked-position inference"
+      },
+      "bridge_sample": {
+        "n_shared_positions": 6,
+        "passed": false,
+        "on_fail": "descriptive only; no p-value headline"
+      },
+      "null_usable": {
+        "null_sd": 0.002,
+        "passed": true,
+        "on_fail": "report 'uncomputable'; never p=0 or p=1"
+      },
+      "broker_set": {
+        "n_brokers": 6027,
+        "passed": true,
+        "on_fail": "descriptive-only broker analysis; insufficient sample"
+      },
+      "tracked_inference_allowed": {
+        "value": false,
+        "passed": false,
+        "on_fail": "no staffing-vs-time claim"
+      }
+    },
+    "2018Q2 -> 2018Q3": {
+      "saturation": {
+        "value": 1.5,
+        "passed": false,
+        "on_fail": "no position-existence claim; width-only descriptive analysis"
+      },
+      "width_sparsity": {
+        "thin_buckets": 1,
+        "passed": false,
+        "on_fail": "no dose-response claim"
+      },
+      "partition_stability": {
+        "mean_seed_ari": 0.882,
+        "modularity_q": -0.0043,
+        "degenerate": false,
+        "passed": false,
+        "on_fail": "no partition-dependent longitudinal inference"
+      },
+      "temporal_mapping": {
+        "match_rate": 0.75,
+        "match_coverage": 0.9588,
+        "passed": true,
+        "on_fail": "quarter-specific descriptive results only; NO tracked-position inference"
+      },
+      "bridge_sample": {
+        "n_shared_positions": 3,
+        "passed": false,
+        "on_fail": "descriptive only; no p-value headline"
+      },
+      "null_usable": {
+        "null_sd": 0.0025,
+        "passed": true,
+        "on_fail": "report 'uncomputable'; never p=0 or p=1"
+      },
+      "broker_set": {
+        "n_brokers": 6027,
+        "passed": true,
+        "on_fail": "descriptive-only broker analysis; insufficient sample"
+      },
+      "tracked_inference_allowed": {
+        "value": false,
+        "passed": false,
+        "on_fail": "no staffing-vs-time claim"
+      }
+    }
+  },
+  "pooled": {
+    "n_transitions": 0,
+    "note": "no eligible transitions with null arrays"
+  },
+  "outputs": [
+    "data/raw/2018Q*.parquet",
+    "data/clean/2018Q*.parquet",
+    "data/logs/coverage_report.csv",
+    "data/logs/cleaning_report.csv",
+    "data/logs/network_results.json",
+    "data/logs/run_manifest_2018Q1-Q3.json"
+  ]
+}

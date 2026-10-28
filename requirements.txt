@@ -1,0 +1,25 @@
+# Core pipeline (fetch.py, clean.py)
+duckdb>=1.0.0
+pandas>=2.0.0
+pyarrow>=14.0.0
+
+# Dashboard (dashboard.py)
+streamlit>=1.35.0
+plotly>=5.20.0
+
+# Network analysis (network_analysis/*)
+# networkx and scipy are imported directly by projection.py, backbone.py,
+# community.py, anchored_matching.py and bipartite.py, but were missing here
+# and were only present transitively. Pinned explicitly so a clean install
+# cannot fail on them.
+networkx>=3.0
+scipy>=1.11.0
+numpy>=1.24.0
+python-igraph>=0.11.0
+leidenalg>=0.10.0
+
+# Tests (tests/)
+pytest>=7.0.0
+
+# Parquet compression used on every fetch export
+zstandard>=0.22.0

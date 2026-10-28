@@ -1,0 +1,189 @@
+2026-08-27 14:33:48,126 | INFO    | ======================================================================
+2026-08-27 14:33:48,126 | INFO    | BRIDGE BROKERS PIPELINE -- starting run
+2026-08-27 14:33:48,127 | INFO    | Window: (2018, 1) to (2018, 1) | Frame size: 36 subreddits
+2026-08-27 14:33:48,127 | INFO    | ======================================================================
+2026-08-27 14:33:48,127 | INFO    | >>> STAGE 1: FETCH
+2026-08-27 14:33:56,254 | INFO    | Fetching 1 quarters: 2018Q1 .. 2018Q1
+2026-08-27 14:33:56,255 | INFO    | Sampling frame: 36 subreddits
+2026-08-27 14:33:56,255 | INFO    | === 2018Q1 ===
+2026-08-27 14:34:30,384 | INFO    |   2018-01: 184 shards found, in batches of 15
+2026-08-27 14:35:19,682 | INFO    |     progress: 15/184 shards done this month, 485,332 rows staged so far
+2026-08-27 14:40:13,226 | INFO    |     progress: 90/184 shards done this month, 3,019,233 rows staged so far
+2026-08-27 14:45:02,092 | INFO    |     progress: 165/184 shards done this month, 5,438,202 rows staged so far
+2026-08-27 14:47:06,598 | INFO    |   2018-02: 173 shards found, in batches of 15
+2026-08-27 14:49:22,764 | WARNING | insert batch 2018-02:0 failed (attempt 1/5): Could not resolve hostname -- retrying in 2s
+2026-08-27 14:51:16,528 | INFO    |     progress: 15/173 shards done this month, 6,643,237 rows staged so far
+2026-08-27 14:56:13,495 | WARNING | insert batch 2018-02:45 failed (attempt 1/5): IO Error: Could not resolve hostname error for HTTP HEAD to 'https://huggingface.co/datasets/open-index/arctic/resolve/main/data/comments/2018/02/058.parquet' -- retrying in 2s
+2026-08-27 14:58:38,550 | WARNING | insert batch 2018-02:60 failed (attempt 1/5): Could not resolve hostname -- retrying in 2s
+2026-08-27 15:02:08,194 | INFO    |     progress: 90/173 shards done this month, 9,050,576 rows staged so far
+2026-08-27 15:08:45,175 | INFO    |     progress: 165/173 shards done this month, 11,670,020 rows staged so far
+2026-08-27 15:09:44,613 | INFO    |   2018-03: 193 shards found, in batches of 15
+2026-08-27 15:10:59,391 | INFO    |     progress: 15/193 shards done this month, 12,468,315 rows staged so far
+2026-08-27 15:17:58,804 | INFO    |     progress: 90/193 shards done this month, 14,934,653 rows staged so far
+2026-08-27 15:25:10,031 | INFO    |     progress: 165/193 shards done this month, 17,402,800 rows staged so far
+2026-08-27 15:27:33,239 | INFO    | 2018Q1: 18,282,918 rows written -> 2018Q1.parquet (complete)
+2026-08-27 15:27:35,906 | INFO    | Coverage report written to D:\coursework\sm\data_curation\data\logs\coverage_report.csv
+2026-08-27 15:27:35,917 | INFO    | >>> STAGE 2: CLEAN
+2026-08-27 15:27:54,950 | INFO    |   manual review candidates written to manual_review_2018Q1.csv
+2026-08-27 15:28:07,625 | INFO    | 2018Q1: 18,282,918 -> 16,074,924 rows (87.9% kept) | 1415020 -> 476996 users | 180 hard-bot removed | 200 flagged for manual review
+2026-08-27 15:28:07,808 | INFO    | Cleaning report written to D:\coursework\sm\data_curation\data\logs\cleaning_report.csv
+2026-08-27 15:28:07,808 | INFO    | ======================================================================
+2026-08-27 15:28:07,809 | INFO    | PIPELINE COMPLETE in 54.3 minutes
+2026-08-27 15:28:07,809 | INFO    |   Fetched : 1/1 quarters
+2026-08-27 15:28:07,810 | INFO    |   Cleaned : 1/1 quarters
+2026-08-27 15:28:07,810 | INFO    |   Reports : D:\coursework\sm\data_curation\data\logs\coverage_report.csv, D:\coursework\sm\data_curation\data\logs\cleaning_report.csv
+2026-08-27 15:28:07,810 | INFO    |   Next    : streamlit run dashboard.py
+2026-08-27 15:28:07,810 | INFO    | ======================================================================
+2026-09-28 17:19:02,983 | INFO    | [2018Q1] frame coverage: 170/170 subreddits observed
+2026-09-28 17:20:05,258 | INFO    | ======================================================================
+2026-09-28 17:20:05,258 | INFO    | BRIDGE BROKERS PIPELINE -- starting run
+2026-09-28 17:20:05,258 | INFO    | Window: (2018, 1) to (2018, 3) | Frame size: 170 subreddits
+2026-09-28 17:20:05,258 | INFO    | ======================================================================
+2026-09-28 17:20:05,258 | INFO    | >>> STAGE 1: FETCH
+2026-09-28 17:20:05,258 | WARNING | TEST MODE: max_shards_per_month=6. Output isolated to raw_TEST/ (NOT data/raw/) using a separate progress file and staging db, so this can never be mistaken for or contaminate real fetched data. Delete raw_TEST/ when done testing.
+2026-09-28 17:20:05,321 | INFO    | Fetching 1 quarters: 2018Q1 .. 2018Q1
+2026-09-28 17:20:05,321 | INFO    | Sampling frame: 170 subreddits
+2026-09-28 17:20:05,321 | INFO    | === 2018Q1 ===
+2026-09-28 17:20:42,259 | INFO    |   2018-01: capping to 6/184 shards (max_shards_per_month set -- TEST MODE)
+2026-09-28 17:20:42,259 | INFO    |   2018-01: 6 shards found, in batches of 6
+2026-09-28 17:20:57,864 | INFO    |     progress: 6/6 shards done this month, 588,158 rows staged so far
+2026-09-28 17:21:27,015 | INFO    |   2018-02: capping to 6/173 shards (max_shards_per_month set -- TEST MODE)
+2026-09-28 17:21:27,015 | INFO    |   2018-02: 6 shards found, in batches of 6
+2026-09-28 17:21:40,957 | INFO    |     progress: 6/6 shards done this month, 1,213,294 rows staged so far
+2026-09-28 17:22:08,101 | INFO    |   2018-03: capping to 6/193 shards (max_shards_per_month set -- TEST MODE)
+2026-09-28 17:22:08,101 | INFO    |   2018-03: 6 shards found, in batches of 6
+2026-09-28 17:22:22,168 | INFO    |     progress: 6/6 shards done this month, 1,834,018 rows staged so far
+2026-09-28 17:22:22,195 | INFO    | [2018Q1] frame coverage: 170/170 subreddits observed
+2026-09-28 17:22:22,415 | INFO    | 2018Q1: 1,834,018 rows written -> 2018Q1.parquet (complete)
+2026-09-28 17:22:22,440 | INFO    | TEST MODE run finished -- coverage_report.csv NOT updated (test output doesn't belong in the real coverage record).
+2026-09-28 17:22:22,440 | INFO    | >>> STAGE 2: CLEAN
+2026-09-28 17:22:22,452 | WARNING | No raw quarters found in C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\raw -- run fetch.py first
+2026-09-28 17:22:22,456 | INFO    | ======================================================================
+2026-09-28 17:22:22,458 | INFO    | PIPELINE COMPLETE in 2.3 minutes
+2026-09-28 17:22:22,458 | INFO    |   Fetched : 1/1 quarters
+2026-09-28 17:22:22,458 | INFO    |   Cleaned : 0/0 quarters
+2026-09-28 17:22:22,458 | INFO    |   Reports : C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\coverage_report.csv, C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\cleaning_report.csv
+2026-09-28 17:22:22,458 | INFO    |   Next    : streamlit run dashboard.py
+2026-09-28 17:22:22,458 | INFO    | ======================================================================
+2026-09-28 17:24:13,801 | INFO    |   manual_review_2018Q1.csv: reusing 200 existing manual verdict(s)
+2026-09-28 17:24:13,801 | INFO    |   manual review: carried over 24 verdict(s)
+2026-09-28 17:24:13,801 | INFO    |   manual review candidates written to manual_review_2018Q1.csv (24/200 verdicts recorded)
+2026-09-28 17:24:14,200 | INFO    | 2018Q1: 1,834,018 -> 1,142,690 rows (62.3% kept) | 518539 -> 90892 users | 0 hard-bot removed | 200 flagged for manual review | 0 rows removed by manual verdict
+2026-09-28 17:28:13,900 | INFO    |   manual review candidates written to manual_review_2018Q1.csv (0/200 verdicts recorded)
+2026-09-28 17:28:14,313 | INFO    | 2018Q1: 1,834,018 -> 1,142,690 rows (62.3% kept) | 518539 -> 90892 users | 0 hard-bot removed | 200 flagged for manual review | 0 rows removed by manual verdict (no verdicts recorded yet)
+2026-10-05 15:20:34,697 | WARNING | TEST MODE: max_shards_per_month=2. Output isolated to raw_TEST/ (NOT data/raw/) using a separate progress file and staging db, so this can never be mistaken for or contaminate real fetched data. Delete raw_TEST/ when done testing.
+2026-10-05 15:20:34,770 | INFO    | Fetching 1 quarters: 2018Q1 .. 2018Q1
+2026-10-05 15:20:34,770 | INFO    | Sampling frame: 14 subreddits
+2026-10-05 15:20:34,771 | INFO    | === 2018Q1 ===
+2026-10-05 15:20:59,085 | INFO    |   2018-01: capping to 2/184 shards (max_shards_per_month set -- TEST MODE)
+2026-10-05 15:20:59,085 | INFO    |   2018-01: 2 shards found, in batches of 2
+2026-10-05 15:21:23,731 | INFO    |   2018-02: capping to 2/173 shards (max_shards_per_month set -- TEST MODE)
+2026-10-05 15:21:23,731 | INFO    |   2018-02: 2 shards found, in batches of 2
+2026-10-05 15:21:45,276 | INFO    |   2018-03: capping to 2/193 shards (max_shards_per_month set -- TEST MODE)
+2026-10-05 15:21:45,276 | INFO    |   2018-03: 2 shards found, in batches of 2
+2026-10-05 15:21:45,279 | WARNING | 2018Q1: NO DATA extracted -- skipping export
+2026-10-05 15:21:45,298 | INFO    | TEST MODE run finished -- coverage_report.csv NOT updated (test output doesn't belong in the real coverage record).
+2026-10-05 15:23:47,687 | WARNING | TEST MODE: max_shards_per_month=2. Output isolated to raw_TEST/ (NOT data/raw/) using a separate progress file and staging db, so this can never be mistaken for or contaminate real fetched data. Delete raw_TEST/ when done testing.
+2026-10-05 15:23:47,735 | INFO    | Fetching 1 quarters: 2018Q1 .. 2018Q1
+2026-10-05 15:23:47,735 | INFO    | Sampling frame: 14 subreddits
+2026-10-05 15:23:47,735 | INFO    | === 2018Q1 ===
+2026-10-05 15:24:10,208 | INFO    |   2018-01: capping to 2/184 shards (max_shards_per_month set -- TEST MODE)
+2026-10-05 15:24:10,208 | INFO    |   2018-01: 2 shards found, in batches of 2
+2026-10-05 15:24:23,461 | INFO    |     progress: 2/2 shards done this month, 65,825 rows staged so far
+2026-10-05 15:24:48,522 | INFO    |   2018-02: capping to 2/173 shards (max_shards_per_month set -- TEST MODE)
+2026-10-05 15:24:48,522 | INFO    |   2018-02: 2 shards found, in batches of 2
+2026-10-05 15:25:01,842 | INFO    |     progress: 2/2 shards done this month, 130,774 rows staged so far
+2026-10-05 15:25:22,580 | INFO    |   2018-03: capping to 2/193 shards (max_shards_per_month set -- TEST MODE)
+2026-10-05 15:25:22,580 | INFO    |   2018-03: 2 shards found, in batches of 2
+2026-10-05 15:25:33,574 | INFO    |     progress: 2/2 shards done this month, 185,955 rows staged so far
+2026-10-05 15:25:33,583 | INFO    | [2018Q1] frame coverage: 14/14 subreddits observed
+2026-10-05 15:25:33,652 | INFO    | 2018Q1: 185,955 rows written -> 2018Q1.parquet (complete)
+2026-10-05 15:25:33,668 | INFO    | TEST MODE run finished -- coverage_report.csv NOT updated (test output doesn't belong in the real coverage record).
+2026-10-05 15:27:22,266 | INFO    | ======================================================================
+2026-10-05 15:27:22,266 | INFO    | BRIDGE BROKERS PIPELINE -- starting run
+2026-10-05 15:27:22,266 | INFO    | Window: (2018, 1) to (2018, 3) | Frame size: 170 subreddits
+2026-10-05 15:27:22,266 | INFO    | ======================================================================
+2026-10-05 15:27:22,266 | INFO    | >>> STAGE 1: FETCH
+2026-10-05 15:27:22,319 | INFO    | Fetching 1 quarters: 2018Q1 .. 2018Q1
+2026-10-05 15:27:22,319 | INFO    | Sampling frame: 170 subreddits
+2026-10-05 15:27:22,319 | INFO    | === 2018Q1 ===
+2026-10-05 15:27:44,803 | INFO    |   2018-01: 184 shards found, in batches of 15
+2026-10-05 15:28:29,784 | INFO    |     progress: 15/184 shards done this month, 1,524,180 rows staged so far
+2026-10-05 15:31:58,920 | INFO    |     progress: 90/184 shards done this month, 9,095,255 rows staged so far
+2026-10-05 15:35:33,197 | INFO    |     progress: 165/184 shards done this month, 16,705,405 rows staged so far
+2026-10-05 15:37:00,409 | INFO    |   2018-02: 173 shards found, in batches of 15
+2026-10-05 15:37:39,627 | INFO    |     progress: 15/173 shards done this month, 20,143,595 rows staged so far
+2026-10-05 15:41:22,448 | INFO    |     progress: 90/173 shards done this month, 27,775,769 rows staged so far
+2026-10-05 15:44:48,537 | INFO    |     progress: 165/173 shards done this month, 35,437,002 rows staged so far
+2026-10-05 15:45:32,548 | INFO    |   2018-03: 193 shards found, in batches of 15
+2026-10-05 15:46:13,116 | INFO    |     progress: 15/193 shards done this month, 37,744,872 rows staged so far
+2026-10-05 15:50:03,221 | INFO    |     progress: 90/193 shards done this month, 45,062,769 rows staged so far
+2026-10-05 15:53:10,003 | INFO    |     progress: 165/193 shards done this month, 52,486,517 rows staged so far
+2026-10-05 15:54:23,165 | INFO    | [2018Q1] frame coverage: 170/170 subreddits observed
+2026-10-05 15:54:28,181 | INFO    | 2018Q1: 55,248,128 rows written -> 2018Q1.parquet (complete)
+2026-10-05 15:54:28,925 | INFO    | Coverage report written to C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\coverage_report.csv
+2026-10-05 15:54:28,925 | INFO    | >>> STAGE 2: CLEAN
+2026-10-05 15:54:44,330 | INFO    |   manual review candidates written to manual_review_2018Q1.csv (0/200 verdicts recorded)
+2026-10-05 15:55:10,541 | INFO    | 2018Q1: 55,248,128 -> 52,118,250 rows (94.3% kept) | 2919421 -> 1215022 users | 5 hard-bot removed | 200 flagged for manual review | 0 rows removed by manual verdict (no verdicts recorded yet)
+2026-10-05 15:55:10,895 | INFO    | Cleaning report written to C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\cleaning_report.csv
+2026-10-05 15:55:10,895 | INFO    | ======================================================================
+2026-10-05 15:55:10,895 | INFO    | PIPELINE COMPLETE in 27.8 minutes
+2026-10-05 15:55:10,896 | INFO    |   Fetched : 1/1 quarters
+2026-10-05 15:55:10,896 | INFO    |   Cleaned : 1/1 quarters
+2026-10-05 15:55:10,896 | INFO    |   Reports : C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\coverage_report.csv, C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\cleaning_report.csv
+2026-10-05 15:55:10,896 | INFO    |   Next    : streamlit run dashboard.py
+2026-10-05 15:55:10,896 | INFO    | ======================================================================
+2026-10-05 15:55:27,650 | INFO    | ======================================================================
+2026-10-05 15:55:27,650 | INFO    | BRIDGE BROKERS PIPELINE -- starting run
+2026-10-05 15:55:27,650 | INFO    | Window: (2018, 4) to (2018, 9) | Frame size: 170 subreddits
+2026-10-05 15:55:27,650 | INFO    | ======================================================================
+2026-10-05 15:55:27,650 | INFO    | >>> STAGE 1: FETCH
+2026-10-05 15:55:28,285 | INFO    | Fetching 2 quarters: 2018Q2 .. 2018Q3
+2026-10-05 15:55:28,286 | INFO    | Sampling frame: 170 subreddits
+2026-10-05 15:55:28,286 | INFO    | === 2018Q2 ===
+2026-10-05 15:55:51,374 | INFO    |   2018-04: 197 shards found, in batches of 15
+2026-10-05 15:56:28,321 | INFO    |     progress: 15/197 shards done this month, 1,318,398 rows staged so far
+2026-10-05 15:59:49,840 | INFO    |     progress: 90/197 shards done this month, 8,401,101 rows staged so far
+2026-10-05 16:03:09,567 | INFO    |     progress: 165/197 shards done this month, 15,559,806 rows staged so far
+2026-10-05 16:05:01,436 | INFO    |   2018-05: 201 shards found, in batches of 15
+2026-10-05 16:05:38,768 | INFO    |     progress: 15/201 shards done this month, 20,260,684 rows staged so far
+2026-10-05 16:08:59,625 | INFO    |     progress: 90/201 shards done this month, 27,634,306 rows staged so far
+2026-10-05 16:12:24,135 | INFO    |     progress: 165/201 shards done this month, 34,926,454 rows staged so far
+2026-10-05 16:14:20,288 | INFO    |   2018-06: 201 shards found, in batches of 15
+2026-10-05 16:14:55,211 | INFO    |     progress: 15/201 shards done this month, 39,632,843 rows staged so far
+2026-10-05 16:17:45,501 | INFO    |     progress: 90/201 shards done this month, 46,628,829 rows staged so far
+2026-10-05 16:21:07,400 | INFO    |     progress: 165/201 shards done this month, 53,887,966 rows staged so far
+2026-10-05 16:22:48,822 | INFO    | [2018Q2] frame coverage: 170/170 subreddits observed
+2026-10-05 16:22:54,775 | INFO    | 2018Q2: 57,301,138 rows written -> 2018Q2.parquet (complete)
+2026-10-05 16:22:54,775 | INFO    | === 2018Q3 ===
+2026-10-05 16:23:19,418 | INFO    |   2018-07: 217 shards found, in batches of 15
+2026-10-05 16:23:56,115 | INFO    |     progress: 15/217 shards done this month, 1,279,076 rows staged so far
+2026-10-05 16:27:11,860 | INFO    |     progress: 90/217 shards done this month, 8,079,413 rows staged so far
+2026-10-05 16:30:32,923 | INFO    |     progress: 165/217 shards done this month, 15,132,073 rows staged so far
+2026-10-05 16:33:28,945 | INFO    |   2018-08: 215 shards found, in batches of 15
+2026-10-05 16:34:17,319 | INFO    |     progress: 15/215 shards done this month, 21,337,071 rows staged so far
+2026-10-05 16:37:26,730 | INFO    |     progress: 90/215 shards done this month, 28,306,698 rows staged so far
+2026-10-05 16:40:38,410 | INFO    |     progress: 165/215 shards done this month, 35,300,899 rows staged so far
+2026-10-05 16:43:15,853 | INFO    |   2018-09: 209 shards found, in batches of 15
+2026-10-05 16:43:55,946 | INFO    |     progress: 15/209 shards done this month, 41,301,937 rows staged so far
+2026-10-05 16:47:11,237 | INFO    |     progress: 90/209 shards done this month, 48,171,618 rows staged so far
+2026-10-05 16:50:40,731 | INFO    |     progress: 165/209 shards done this month, 54,891,290 rows staged so far
+2026-10-05 16:52:48,416 | INFO    | [2018Q3] frame coverage: 170/170 subreddits observed
+2026-10-05 16:53:02,488 | INFO    | 2018Q3: 59,053,604 rows written -> 2018Q3.parquet (complete)
+2026-10-05 16:53:10,878 | INFO    | Coverage report written to C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\coverage_report.csv
+2026-10-05 16:53:10,900 | INFO    | >>> STAGE 2: CLEAN
+2026-10-05 16:53:43,552 | INFO    |   manual review candidates written to manual_review_2018Q1.csv (0/200 verdicts recorded)
+2026-10-05 16:54:14,894 | INFO    | 2018Q1: 55,248,128 -> 52,118,250 rows (94.3% kept) | 2919421 -> 1215022 users | 5 hard-bot removed | 200 flagged for manual review | 0 rows removed by manual verdict (no verdicts recorded yet)
+2026-10-05 16:54:40,182 | INFO    |   manual review candidates written to manual_review_2018Q2.csv (0/200 verdicts recorded)
+2026-10-05 16:55:17,962 | INFO    | 2018Q2: 57,301,138 -> 54,002,756 rows (94.2% kept) | 3069238 -> 1279269 users | 5 hard-bot removed | 200 flagged for manual review | 0 rows removed by manual verdict (no verdicts recorded yet)
+2026-10-05 16:55:52,033 | INFO    |   manual review candidates written to manual_review_2018Q3.csv (0/200 verdicts recorded)
+2026-10-05 16:56:43,451 | INFO    | 2018Q3: 59,053,604 -> 55,570,837 rows (94.1% kept) | 3248860 -> 1339394 users | 0 hard-bot removed | 200 flagged for manual review | 0 rows removed by manual verdict (no verdicts recorded yet)
+2026-10-05 16:56:44,404 | INFO    | Cleaning report written to C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\cleaning_report.csv
+2026-10-05 16:56:44,407 | INFO    | ======================================================================
+2026-10-05 16:56:44,407 | INFO    | PIPELINE COMPLETE in 61.3 minutes
+2026-10-05 16:56:44,411 | INFO    |   Fetched : 2/2 quarters
+2026-10-05 16:56:44,411 | INFO    |   Cleaned : 3/3 quarters
+2026-10-05 16:56:44,412 | INFO    |   Reports : C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\coverage_report.csv, C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\cleaning_report.csv
+2026-10-05 16:56:44,412 | INFO    |   Next    : streamlit run dashboard.py
+2026-10-05 16:56:44,412 | INFO    | ======================================================================
+2026-10-05 16:57:28,314 | INFO    | Coverage report written to C:\Users\vansh\Desktop\CSMA\sm\data_curation\data\logs\coverage_report.csv
