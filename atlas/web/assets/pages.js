@@ -90,7 +90,9 @@ export function renderStart(main) {
     const cards = [];
     if (big && ex) cards.push({ a: big, b: ex, s: pairStats(p, big.id, ex.id), tone: "plain" });
     if (pa && pb) cards.push({ a: pa, b: pb, s: pairStats(p, pa.id, pb.id), tone: "surprise" });
-    main.querySelector("#pair-cards").innerHTML = cards.map((c) => `
+    const pcEl = main.querySelector("#pair-cards");
+    if (!pcEl) return cards;   // the visitor already left the Start page while the pairs were loading
+    pcEl.innerHTML = cards.map((c) => `
       <a class="pair-card ${c.tone}" href="${hashFor("compare", [], { a: c.a.name, b: c.b.name })}">
         <div class="pc-names"><span>r/${esc(c.a.name)}</span><i>×</i><span>r/${esc(c.b.name)}</span></div>
         <div class="pc-nums"><div><b>${fmtInt(c.s.shared)}</b><span>shared commenters</span></div><div><b>${fmtInt(c.s.expected)}</b><span>expected by chance</span></div><div class="pc-aff"><b>${fmtX(c.s.affinity, c.s.affinity < 1.5 ? 2 : 1)}</b><span>${c.s.validated ? "surprising" : "what chance gives"}</span></div></div>

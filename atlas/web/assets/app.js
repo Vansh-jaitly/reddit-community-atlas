@@ -1,5 +1,6 @@
 // Router: one page at a time, each page returns an optional cleanup function.
 import { loadCore, parseHash, esc, PAGE } from "./core.js";
+import { renderFindings } from "./findings.js";
 import { renderStart, renderAtlas, renderExplore } from "./pages.js";
 import { renderCompare, renderStories, renderPipeline, renderAbout } from "./pages2.js";
 import { initTour, startTour, startTourAt, tourOnNavigate } from "./tour.js";
@@ -7,6 +8,7 @@ import { initTour, startTour, startTourAt, tourOnNavigate } from "./tour.js";
 const ROUTES = {
   start: renderStart, atlas: renderAtlas, explore: renderExplore,
   compare: renderCompare, stories: renderStories, pipeline: renderPipeline, about: renderAbout,
+  findings: renderFindings,
   // earlier addresses still work
   discover: renderStart, methods: renderAbout,
 };

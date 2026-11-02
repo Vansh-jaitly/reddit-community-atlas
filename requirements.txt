@@ -23,3 +23,6 @@ pytest>=7.0.0
 
 # Parquet compression used on every fetch export
 zstandard>=0.22.0
+
+# Findings section: comment sentiment (lexicon + rules, CPU only, reproducible)
+vaderSentiment==3.3.2
