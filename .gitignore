@@ -22,3 +22,8 @@ tools/deck/node_modules/
 
 # local tool configuration (Claude Code preview server etc.)
 .claude/
+
+# Findings section: comment text + reply structure stay local (public text, never committed)
+data_curation/data/raw_text/
+data_curation/data/raw_text_TEST/
+data_curation/data/findings_cache/

@@ -43,6 +43,11 @@ VIEWS = [
     ("20_atlas_mobile", "#/atlas?sel={Bitcoin}", 390, 844),
     ("21_story_crowds_starwars", "#/stories/crowds?step=3"),
     ("22_story_crowds_marvel", "#/stories/crowds?step=4"),
+    ("23_findings_home", "#/findings"),
+    ("24_findings_community", "#/findings/community"),
+    ("25_findings_infinity_war", "#/findings/infinity-war?window=release&sub=marvelstudios"),
+    ("26_findings_bitcoin", "#/findings/bitcoin"),
+    ("27_findings_community_mobile", "#/findings/community", 390, 844),
 ]
 BROWSERS = [
     r"C:\Program Files\Google\Chrome\Application\chrome.exe",

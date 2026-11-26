@@ -14,8 +14,8 @@ export function lineChart(el, cfg) {
   const all = cfg.series.flatMap((s) => s.values).filter((v) => v != null && isFinite(v));
   if (!all.length) { el.innerHTML = `<div class="empty">No data for this selection.</div>`; return; }
   const tf = cfg.logY ? Math.log : (v) => v;
-  let lo = cfg.yMin != null ? cfg.yMin : Math.min(...all), hi = Math.max(...all);
-  if (!cfg.logY && cfg.yMin == null) lo = Math.min(0, lo);
+  let lo = cfg.yMin === "auto" ? Math.min(...all) - (Math.max(...all) - Math.min(...all)) * 0.08 : cfg.yMin != null ? cfg.yMin : Math.min(...all), hi = Math.max(...all);
+  if (!cfg.logY && cfg.yMin == null) lo = Math.min(0, lo);   // yMin "auto": fit the axis to the data instead of anchoring at 0
   if (hi === lo) hi = lo + 1;
   const tlo = tf(lo), thi = tf(hi) + (tf(hi) - tf(lo)) * 0.06;
   const n = cfg.labels.length;
@@ -45,7 +45,7 @@ export function lineChart(el, cfg) {
     <g class="axis">${ticks.map((t) => `<text x="${m.l - 8}" y="${y(t) + 4}" text-anchor="end">${esc(fmt(t))}</text>`).join("")}
       ${cfg.labels.map((l, i) => (i % every === 0 || i === n - 1) && !(i === n - 1 && (n - 1) % every !== 0 && (n - 1) % every < every / 2)
         ? `<text x="${x(i)}" y="${H - 8}" text-anchor="middle">${esc(cfg.tickFormat ? cfg.tickFormat(l) : l)}</text>` : "").join("")}</g>
-    <g class="event">${evs.map((e, k) => `<line x1="${x(e.i)}" x2="${x(e.i)}" y1="${m.t}" y2="${H - m.b}"/><text x="${x(e.i) + 4}" y="${m.t + 10 + 13 * (k % 2)}">${esc(e.short ?? e.label)}</text>`).join("")}</g>
+    <g class="event">${evs.map((e, k) => `<line x1="${x(e.i)}" x2="${x(e.i)}" y1="${m.t}" y2="${H - m.b}"/><text x="${x(e.i) + 4}" y="${m.t + 10 + 13 * (k % 2)}">${esc(e.short || e.label)}</text>`).join("")}</g>
     <g class="series">${cfg.series.map((s) => `<path d="${path(s.values)}" stroke="${s.color}" ${s.dashed ? 'stroke-dasharray="5 4"' : ""}/>
       ${s.points ? s.values.map((v, i) => v == null ? "" : `<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="${s.points[i] ? s.color : "var(--surface-1)"}" stroke="${s.color}" stroke-width="2"/>`).join("") : ""}`).join("")}</g>
     <g class="axis">${ends.map((e) => `<text x="${W - m.r + 8}" y="${e.yy + 4}" style="fill:var(--text-secondary)">${esc(trunc(e.s.name, 24))}</text>`).join("")}</g>
