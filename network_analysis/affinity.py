@@ -201,6 +201,20 @@ def poisson_pvalues(observed: np.ndarray, expected: np.ndarray) -> np.ndarray:
     return p
 
 
+def poisson_lower_pvalues(observed: np.ndarray, expected: np.ndarray) -> np.ndarray:
+    """One-sided P(X <= observed) for X ~ Poisson(expected); 1 where nothing is expected.
+
+    The lower tail asks the opposite question to `poisson_pvalues`: do two
+    communities share improbably FEW commenters given their size and activity?
+    """
+    observed = np.asarray(observed, dtype=np.float64)
+    expected = np.asarray(expected, dtype=np.float64)
+    p = np.ones_like(observed)
+    ok = expected > 0
+    p[ok] = poisson.cdf(observed[ok], expected[ok])
+    return p
+
+
 def benjamini_hochberg(pvalues: np.ndarray, alpha: float) -> np.ndarray:
     """Boolean mask of discoveries at false discovery rate alpha."""
     p = np.asarray(pvalues, dtype=np.float64)
@@ -230,6 +244,8 @@ class AffinityNetwork:
     alpha: float
     fit_error: float
     cosine: np.ndarray = field(repr=False, default=None)
+    pvalues_low: np.ndarray = field(repr=False, default=None)   # S x S lower-tail p (diagonal = 1)
+    avoided: np.ndarray = field(repr=False, default=None)       # S x S bool: improbably FEW shared commenters (FDR alpha)
 
     @property
     def affinity(self) -> np.ndarray:
@@ -272,9 +288,13 @@ def affinity_network(M: sp.spmatrix, subreddits: list[str], alpha: float = 0.01)
     keep = benjamini_hochberg(p_up, alpha)
     P = np.ones((S, S)); P[iu] = p_up; P.T[iu] = p_up
     Vd = np.zeros((S, S), dtype=bool); Vd[iu] = keep; Vd = Vd | Vd.T
+    p_lo = poisson_lower_pvalues(V[iu], E[iu])
+    avoid = benjamini_hochberg(p_lo, alpha)
+    PL = np.ones((S, S)); PL[iu] = p_lo; PL.T[iu] = p_lo
+    Av = np.zeros((S, S), dtype=bool); Av[iu] = avoid; Av = Av | Av.T
     k = np.diag(V).astype(np.float64)
     with np.errstate(divide="ignore", invalid="ignore"):
         cos = V / np.sqrt(np.outer(k, k))
     cos[~np.isfinite(cos)] = 0.0
     np.fill_diagonal(cos, 0.0)
-    return AffinityNetwork(list(subreddits), V, E, P, Vd, k, fit.n_users, alpha, fit.max_error, cos)
+    return AffinityNetwork(list(subreddits), V, E, P, Vd, k, fit.n_users, alpha, fit.max_error, cos, PL, Av)

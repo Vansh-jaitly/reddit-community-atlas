@@ -2,7 +2,7 @@
 
 **Purpose of this document:** a complete, self-contained briefing for a new agent (Claude) to continue this project without re-deriving anything. Everything below was verified by direct code inspection and test execution, not recollection.
 
-**Project root:** `C:\Users\vansh\Desktop\CSMA\sm`
+**Project root:** `<repo>`
 **Status:** infrastructure sound and tested; **no real data analysed yet**; several methodology decisions still open.
 **Test suite:** 69 passing.
 

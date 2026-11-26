@@ -157,3 +157,23 @@ def test_matches_reference_bicm_package_when_installed():
     pv = np.asarray(g.get_projected_pvals_mat(layer="columns"))
     iu = np.triu_indices(10, 1)
     np.testing.assert_allclose(pv[iu], net.pvalues[iu], rtol=1e-6, atol=1e-12)
+
+
+class TestLowerTail:
+    def test_lower_tail_pvalues_are_complementary_and_bounded(self):
+        from network_analysis.affinity import poisson_lower_pvalues
+        obs, exp = np.array([0, 5, 5, 20]), np.array([3.0, 0.0, 5.0, 5.0])
+        lo, hi = poisson_lower_pvalues(obs, exp), poisson_pvalues(obs, exp)
+        assert lo[1] == 1.0 and hi[1] == 1.0                      # nothing expected: no evidence either way
+        assert lo[0] < 0.1 and hi[0] == 1.0                       # far below expectation
+        assert lo[3] > 0.999 and hi[3] < 1e-6                     # far above expectation
+        assert np.all((lo >= 0) & (lo <= 1))
+
+    def test_planted_blocks_avoid_each_other(self):
+        net = affinity_network(planted_blocks(), [f"s{i}" for i in range(10)])
+        across = [(a, b) for a in range(5) for b in range(5, 10)]
+        within = [(a, b) for blk in (range(5), range(5, 10)) for a in blk for b in blk if a < b]
+        assert sum(net.avoided[a, b] for a, b in across) >= len(across) // 2
+        assert not any(net.avoided[a, b] for a, b in within)
+        assert not (net.avoided & net.validated).any()
+        assert np.array_equal(net.avoided, net.avoided.T)

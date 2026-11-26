@@ -20,6 +20,11 @@ const mlabel = (m) => new Date(Date.UTC(+m.slice(0, 4), +m.slice(5, 7) - 1, 1)).
 const totRaw = CL.reduce((a, r) => a + +r.rows_raw, 0), totClean = CL.reduce((a, r) => a + +r.rows_clean, 0);
 const months = S.months, Q = S.quarters;
 const qj = Object.values(S.quarter_edge_jaccard);
+const nodes = J("atlas/web/data/nodes.json");
+const nHubs = nodes.filter((n) => n.category === "gateway").length;
+const pipeline = J("atlas/web/data/pipeline.json");
+const nTests = pipeline.tests.length;
+const commPhrase = S.anchor.communities_major != null ? `${S.anchor.communities_major} major communities (plus ${S.anchor.small_groups} small groups and ${S.anchor.isolates} isolate${S.anchor.isolates === 1 ? "" : "s"})` : `${S.anchor.communities} communities`;
 
 // ---------- palette (matches the app; validated dark categorical slots) ----------
 const BG = "111110", BG2 = "1A1A19", CARD = "222220", LINE = "333330";
@@ -78,13 +83,13 @@ let s = pres.addSlide({ masterName: "TITLE", sectionTitle: "Opening" });
 s.addText("Beyond the Hairball: The Reddit Community Atlas", { placeholder: "title" });
 s.addText(`What really connects Reddit's communities? An interactive map of surprising shared audiences across ${S.subreddits} subreddits, ${mlabel(months[0])} – ${mlabel(months.at(-1))}`, { placeholder: "body" });
 text(s, "CSE3729 Computational Social Media Analysis · BML Munjal University\nAkashita (230779) · Vansh Jaitly (230687)", { x: 0.6, y: 6.15, w: 6.2, h: 0.7, fontSize: 13, color: MUTED });
-image(s, "01_discover.png", 7.1, 1.6, 5.7);
+image(s, "01_start.png", 7.1, 1.6, 5.7);
 s.addNotes("Introduce the question: which Reddit communities share an audience, and which only seem to because they are big. Point at the live map: every circle is a subreddit, every line a surprisingly large shared audience.");
 
 // 2 ---------------------------------------------------------------- hairball
 pres.addSection({ title: "Problem and data" });
 s = content("Problem and data", "Raw shared audiences connect almost everything");
-image(s, "02_atlas_raw.png", 0.6, 1.45, 5.85);
+image(s, "02_start_raw.png", 0.6, 1.45, 5.85);
 image(s, "03_atlas_adjusted.png", 6.85, 1.45, 5.85);
 stat(s, 0.6, 5.25, 5.8, pct(S.cosine_density.all, 2), "of subreddit pairs share at least one commenter: the raw network is a hairball");
 stat(s, 6.85, 5.25, 5.8, pct(S.validated_density.all), "of pairs share far more commenters than size and activity predict", SER[0]);
@@ -103,13 +108,13 @@ flow.forEach((f, k) => {
 });
 text(s, [
   { text: "Frame: ", options: { bold: true, color: INK } },
-  { text: "150 topical subreddits (25 in each of 6 categories) + 20 front-page hubs, chosen by a fixed rule before analysis. ", options: {} },
+  { text: `${S.subreddits - nHubs} topical subreddits (25 in each of 6 categories) + ${nHubs} front-page hubs, chosen by a fixed rule before analysis. `, options: {} },
   { text: "Scope: ", options: { bold: true, color: INK } },
   { text: `the proposal planned 2019–2025; the archive's comments end in Aug 2022, and this bounded study covers ${Q.map((q) => q.slice(0, 4) + " Q" + q.slice(-1)).join(", ")}. `, options: {} },
   { text: "Privacy: ", options: { bold: true, color: INK } },
   { text: "no text stored; usernames hashed at collection; only subreddit-level aggregates published.", options: {} },
 ], { x: 0.6, y: 5.2, w: 12.1, h: 1.5, fontSize: 15 });
-s.addNotes("Data: public comments from the Arctic Shift archive, read remotely with DuckDB. Every fetch checks that all 170 subreddits are present. Cleaning keeps accounts with at least five comments a quarter and removes bot-like accounts.");
+s.addNotes(`Data: public comments from the Arctic Shift archive, read remotely with DuckDB. Every fetch checks that all ${S.subreddits} subreddits are present. Cleaning keeps accounts with at least five comments a quarter and removes bot-like accounts.`);
 
 // 4 ---------------------------------------------------------------- method
 pres.addSection({ title: "Method" });
@@ -122,20 +127,20 @@ text(s, `A link is drawn only when the shared count is improbably high: one-side
 const checks = [
   [`${CC.validated_ours} = ${CC.validated_reference}`, "links validated by our code and the published bicm package (150k-user real sample)"],
   [pct(S.robust_share.all, 0), "of links survive a stricter ≥2-comment threshold"],
-  [`${Math.round(100 * Math.min(...qj))}–${Math.round(100 * Math.max(...qj))}%`, "of links persist from one quarter to the next (Jaccard)"],
-  ["108", "automated tests, incl. recomputing every story number from published data"],
+  [`${Math.min(...qj).toFixed(2)}–${Math.max(...qj).toFixed(2)}`, `Jaccard overlap of consecutive quarters' link sets (about ${Math.round(100 * 2 * Math.min(...qj) / (1 + Math.min(...qj)))}% of a quarter's links recur)`],
+  [String(nTests), "automated tests, incl. recomputing every story number from published data"],
 ];
 checks.forEach(([b, l], k) => { const y = 1.5 + k * 1.33; card(s, 7.25, y, 5.45, 1.15, `check-${k}`); text(s, b, { x: 7.5, y: y + 0.12, w: 1.9, h: 0.9, fontSize: 26, bold: true, color: SER[2], valign: "middle" }); text(s, l, { x: 9.45, y: y + 0.12, w: 3.1, h: 0.9, fontSize: 13.5, valign: "middle" }); });
 s.addNotes("Explain observed versus expected in one sentence. The model only keeps how active each person is and how big each community is; anything beyond that is a genuine shared audience. Validation: identical to the reference implementation, robust to a stricter threshold, stable over time.");
 
 // 5 ---------------------------------------------------------------- story 1
 pres.addSection({ title: "Findings" });
-s = content("Findings", "What popularity hides: hubs vanish from real neighbour lists");
+s = content("Findings", "What popularity hides: hubs mostly vanish from real neighbour lists");
 const ex = A.example;
 card(s, 0.6, 1.5, 3.6, 5.2, "s1-stats");
 stat(s, 0.85, 1.7, 3.2, pct(A.hub_share_cosine, 0), "of a topical subreddit's 10 closest neighbours are front-page hubs, by raw overlap");
 stat(s, 0.85, 3.4, 3.2, pct(A.hub_share_affinity, 0), "after adjusting for size and activity", SER[0]);
-text(s, `r/${A.biggest}: ${fmt(A.biggest_users)} commenters, median affinity ${A.biggest_median_affinity.toFixed(2)}× — big, not close to anyone.`, { x: 0.85, y: 5.25, w: 3.2, h: 1.3, fontSize: 13.5 });
+text(s, `r/${A.giant_pair.a} – r/${A.giant_pair.b}: ${fmt(A.giant_pair.shared)} shared, ${fmt(A.giant_pair.expected)} expected (${A.giant_pair.affinity.toFixed(2)}×), never a surprising link. r/${A.biggest} holds ${pct(A.biggest_share_of_commenters, 0)} of commenters, so its affinity is capped near ${A.biggest_affinity_ceiling_median.toFixed(1)}× by construction.`, { x: 0.85, y: 5.0, w: 3.2, h: 1.6, fontSize: 12.5 });
 const col = (x, title, rows, color) => {
   text(s, title, { x, y: 1.55, w: 4, h: 0.4, fontSize: 16, bold: true, color: INK });
   rows.forEach((r, k) => {
@@ -151,7 +156,7 @@ text(s, "Numbers: affinity (shared ÷ expected) over all 12 months. 1.0× = chan
 s.addNotes(`By raw overlap r/${ex} looks closest to front-page hubs. Adjusted, its neighbours are ${A.example_affinity_neighbours.slice(0, 3).map((x) => "r/" + x.name).join(", ")}.`);
 
 // 6 ---------------------------------------------------------------- communities
-s = content("Findings", `${S.anchor.communities} stable communities emerge from the surprising links`);
+s = content("Findings", `${commPhrase} emerge from the surprising links`);
 image(s, "03_atlas_adjusted.png", 0.6, 1.45, 7.3);
 meta.communities.forEach((c, k) => {
   const y = 1.5 + k * 0.5;
@@ -160,10 +165,10 @@ meta.communities.forEach((c, k) => {
   text(s, String(c.size), { x: 12.1, y, w: 0.6, h: 0.42, fontSize: 14.5, color: MUTED, align: "right", valign: "middle" });
 });
 text(s, `Weighted modularity ${S.anchor.weighted_modularity} · agreement across 20 seeds ARI ${S.anchor.seed_ari} · each quarter's communities match at ARI ${Q.map((q) => S.period_communities[q].ari_vs_anchor).join(", ")}`, { x: 8.3, y: 6.15, w: 4.4, h: 0.7, fontSize: 12, color: MUTED });
-s.addNotes("The detected communities largely follow topics, with telling exceptions: r/Economics sits with politics, and media subreddits split between the front page and hobbies.");
+s.addNotes(`The detected communities partly follow the frame categories (ARI ${S.category_ari_vs_anchor}), with telling exceptions: r/Economics sits with politics, and media subreddits split between the front page and hobbies.`);
 
 // 7 ---------------------------------------------------------------- story 2
-s = content("Findings", "Unexpected neighbours: for some communities, country beats topic");
+s = content("Findings", "Neighbours and strangers: a nation's politics and money forums share an audience");
 const top = B.top_links.slice(0, 8).reverse();
 s.addChart(pres.charts.BAR, [{ name: "Minimum affinity in any quarter", labels: top.map((x) => `r/${x.a} – r/${x.b}`), values: top.map((x) => x.min_affinity) }], {
   x: 0.6, y: 1.45, w: 7.9, h: 5.3, barDir: "bar", chartColors: [SER[1]], showValue: true, dataLabelPosition: "outEnd", dataLabelFormatCode: '0.0"×"',
@@ -175,11 +180,12 @@ const lead = B.top_links[0];
 card(s, 8.85, 1.5, 3.85, 5.2, "s2-callout");
 stat(s, 9.1, 1.7, 3.4, fmt(lead.shared_all), `commenters shared by r/${lead.a} and r/${lead.b}`);
 stat(s, 9.1, 3.35, 3.4, fmt(lead.expected_all), "expected from size and activity alone", SER[1]);
-text(s, `${B.robust_cross_category_links} cross-category links hold in every quarter and under the stricter threshold. The second strongest is the UK pair. Without text we cannot say why: geography, profession and demographics all fit.`, { x: 9.1, y: 5.0, w: 3.4, h: 1.6, fontSize: 13.5 });
-s.addNotes("A nation's politics forum and its personal-finance forum share an audience seven times larger than chance, in every quarter.");
+const ctrl = B.country.same_topic_across_border[0], low = B.lowest_pairs[0];
+text(s, `${B.robust_cross_category_links} cross-category links hold in every quarter and under the stricter threshold; the second strongest is the UK pair. The control, the same money topic across the border (r/${ctrl.a} – r/${ctrl.b}), shares ${ctrl.affinity.toFixed(2)}× of chance. The same test finds strangers: r/${low.a} – r/${low.b} ${low.affinity.toFixed(3)}×. Without text we cannot say why.`, { x: 9.1, y: 4.75, w: 3.4, h: 1.9, fontSize: 12.5 });
+s.addNotes("A nation's politics forum and its personal-finance forum share an audience several times larger than chance in every quarter, while the same topic across the border sits far below chance. Consistent with shared nationality in these two cases, not a general law. Political opponents all share more than chance.");
 
 // 8 ---------------------------------------------------------------- story 3
-s = content("Findings", "The hidden connectors are mid-sized topical communities, not hubs");
+s = content("Findings", "The connectors are mid-sized topical communities; the giants are sealed");
 const conn = C.connectors.slice(0, 8).reverse();
 s.addChart(pres.charts.BAR, [{ name: "Participation", labels: conn.map((c) => `r/${c.name}`), values: conn.map((c) => c.participation_min) }], {
   x: 0.6, y: 1.45, w: 7.9, h: 5.3, barDir: "bar", chartColors: [SER[2]], showValue: true, dataLabelPosition: "outEnd", dataLabelFormatCode: "0.00",
@@ -188,54 +194,57 @@ s.addChart(pres.charts.BAR, [{ name: "Participation", labels: conn.map((c) => `r
   showTitle: true, title: "Participation coefficient, minimum across quarters (≥ 8 links)", titleColor: MUTED, titleFontSize: 12, titleFontFace: FONT,
 });
 card(s, 8.85, 1.5, 3.85, 5.2, "s3-callout");
-stat(s, 9.1, 1.7, 3.4, C.hub_mean_participation.toFixed(2), "average for the 20 front-page hubs");
+stat(s, 9.1, 1.7, 3.4, C.hub_mean_participation.toFixed(2), `average for the ${nHubs} front-page hubs (gap not significant)`);
 stat(s, 9.1, 3.35, 3.4, C.topical_mean_participation.toFixed(2), "average for topical communities", SER[2]);
-text(s, `0 = all surprising links stay in one community; towards 1 = spread evenly. Rankings are stable between quarters (ρ ${Object.values(C.rank_stability).map((v) => v.toFixed(2)).join(", ")}).`, { x: 9.1, y: 5.0, w: 3.4, h: 1.6, fontSize: 13.5 });
+const ow = C.outward, owMax = ow[0], owMin = ow[ow.length - 1];
+text(s, `0 = all links stay in one cluster; towards 1 = spread evenly. ${owMax.community} sends ${pct(owMax.outward_share, 0)} of its links to other clusters, ${owMin.community} ${pct(owMin.outward_share, 0)}. r/${C.giants.name}: all ${C.giants.links_inside_bloc} links inside its own cluster.`, { x: 9.1, y: 4.9, w: 3.4, h: 1.75, fontSize: 12.5 });
 s.addNotes("Connectors share unusually large audiences with several clusters. That is co-presence, not evidence that information flows through them.");
 
 // 9 ---------------------------------------------------------------- story 4
-s = content("Findings", "When crowds leave, ties tighten; when they arrive, ties loosen");
+s = content("Findings", "Crowds leave a clear trace in the counts; affinity needs a careful reading");
 const idx = (arr) => arr.map((v) => Math.round((100 * v) / arr[0]));
 const crypto = D.crypto_monthly_authors;
 s.addChart(pres.charts.LINE, [
   { name: "r/Bitcoin", labels: months.map(mlabel), values: idx(crypto.Bitcoin) },
   { name: "r/CryptoCurrency", labels: months.map(mlabel), values: idx(crypto.CryptoCurrency) },
   { name: "r/investing", labels: months.map(mlabel), values: idx(D.comparison_monthly_authors.investing) },
-  { name: "All 170 subreddits", labels: months.map(mlabel), values: idx(D.frame_monthly_authors) },
+  { name: `All ${S.subreddits} subreddits`, labels: months.map(mlabel), values: idx(D.frame_monthly_authors) },
 ], {
   x: 0.6, y: 1.45, w: 6.0, h: 4.4, chartColors: [SER[0], SER[1], SER[3], "8A8984"], lineSize: 2, lineDataSymbol: "none",
   catAxisLabelColor: MUTED, valAxisLabelColor: MUTED, catAxisLabelFontSize: 10, valAxisLabelFontSize: 10, catAxisLabelFontFace: FONT, valAxisLabelFontFace: FONT,
   valGridLine: { color: "2B2B29", size: 0.75 }, catGridLine: { style: "none" }, showLegend: true, legendPos: "b", legendColor: INK2, legendFontSize: 11, legendFontFace: FONT,
   showTitle: true, title: `Monthly commenters (${mlabel(months[0])} = 100)`, titleColor: MUTED, titleFontSize: 12, titleFontFace: FONT,
 });
+const [ca, cb] = cpKey.split("|");
 s.addChart(pres.charts.LINE, [
-  { name: `r/${cpKey.replace("|", " – r/")}`, labels: months.map(mlabel), values: cp },
-  { name: `r/${mkKey.replace("|", " – r/")}`, labels: months.map(mlabel), values: mv },
+  { name: `r/${ca} commenters also in r/${cb}`, labels: months.map(mlabel), values: D.crypto_cross_rate_ab.map((v) => Math.round(100 * v)) },
+  { name: `r/${cb} commenters also in r/${ca}`, labels: months.map(mlabel), values: D.crypto_cross_rate_ba.map((v) => Math.round(100 * v)) },
 ], {
-  x: 6.75, y: 1.45, w: 6.0, h: 4.4, chartColors: [SER[0], SER[4]], lineSize: 2, lineDataSymbol: "circle", lineDataSymbolSize: 6,
+  x: 6.75, y: 1.45, w: 6.0, h: 4.4, chartColors: [SER[1], SER[2]], lineSize: 2, lineDataSymbol: "circle", lineDataSymbolSize: 6,
   catAxisLabelColor: MUTED, valAxisLabelColor: MUTED, catAxisLabelFontSize: 10, valAxisLabelFontSize: 10, catAxisLabelFontFace: FONT, valAxisLabelFontFace: FONT,
   valGridLine: { color: "2B2B29", size: 0.75 }, catGridLine: { style: "none" }, showLegend: true, legendPos: "b", legendColor: INK2, legendFontSize: 11, legendFontFace: FONT,
-  valAxisMinVal: 0, showTitle: true, title: "Affinity between the two communities (× chance)", titleColor: MUTED, titleFontSize: 12, titleFontFace: FONT,
+  valAxisMinVal: 0, valAxisMaxVal: 50, showTitle: true, title: `Share of commenters who also post in the other (%) — while affinity went ${cp[mi[base]]}× → ${cp.at(-1)}×`, titleColor: MUTED, titleFontSize: 12, titleFontFace: FONT,
 });
+const rab = D.crypto_cross_rate_ab, sw = D.starwars, T = D.tendency;
 text(s, [
   { text: "Crypto: ", options: { bold: true, color: INK } },
-  { text: `Bitcoin peaked 17 Dec 2017; r/Bitcoin commenters ${Math.round(100 * D.change_since_baseline.Bitcoin)}% by ${mlabel(months.at(-1))} while the frame grew ${Math.round(100 * D.frame_change_since_baseline)}%. The remaining audiences overlap ${cp[mi[base]]}× → ${cp.at(-1)}×.  ` },
-  { text: "Marvel: ", options: { bold: true, color: INK } },
-  { text: `Infinity War (27 Apr 2018) doubled weekly commenters; affinity fell to ${mv[mi["2018-04"]]}× in April.  ` },
+  { text: `r/Bitcoin ${Math.round(100 * D.change_since_baseline.Bitcoin)}% by ${mlabel(months.at(-1))} while the frame grew ${Math.round(100 * D.frame_change_since_baseline)}%. Affinity ${cp[mi[base]]}× → ${cp.at(-1)}× looks like tightening, but the cross-posting share moved only ${pct(rab[mi[base]], 0)} → ${pct(rab.at(-1), 0)}: the expectation shrank with the communities.  ` },
+  { text: "Crowds arriving: ", options: { bold: true, color: INK } },
+  { text: `The Last Jedi took r/${sw.name} to ${sw.dec_over_nov.toFixed(2)}× its November commenters (${pct(sw.new_share_dec, 0)} newcomers); Infinity War doubled r/marvelstudios'. Affinity with their neighbours dipped and recovered.  ` },
   { text: "All communities: ", options: { bold: true, color: INK } },
-  { text: `ρ = ${D.general_tendency.spearman_large_swings} over ${D.general_tendency.n_large_swings} swings > 25%. Association, not causation.` },
-], { x: 0.6, y: 6.0, w: 12.1, h: 0.85, fontSize: 13.5 });
-s.addNotes("Arriving crowds mostly comment in only one of the related communities, which dilutes the surprising overlap; a departing crowd leaves a core active in all of them.");
+  { text: `growth vs affinity drift ρ = ${T.spearman_growth_vs_affinity_trend}; vs raw-overlap drift ρ = ${T.spearman_growth_vs_cosine_trend}. Associations, not causes.` },
+], { x: 0.6, y: 5.95, w: 12.1, h: 0.95, fontSize: 12.5 });
+s.addNotes("A changed affinity is not by itself a changed behaviour. Affinity compares the observed overlap with an expectation that scales with community size; when a crowd leaves, the expectation shrinks and the ratio climbs even though the share of people who cross between the communities barely moves. Check the cross-posting share before calling ties tighter or looser.");
 
 // 10 --------------------------------------------------------------- application
 pres.addSection({ title: "Application" });
-s = content("Application", "The Atlas lets anyone check every claim");
-[["06_story_popularity_example.png", "Guided stories drive the map"], ["13_explore_profile.png", "Profile of any subreddit"], ["14_compare_pair.png", "Compare two communities over time"], ["15_compare_periods.png", "Compare two periods: links gained and lost"]].forEach(([f, cap], k) => {
+s = content("Application", "An atlas that explains itself and lets anyone check every claim");
+[["06_tour_surprise.png", "A guided tour drives the real pages"], ["12_story_takeaway.png", "Discoveries end with a takeaway and ways to check it"], ["16_pipeline_expected.png", "How it's made: every stage with real counts and tests"], ["15_compare_periods.png", "Compare two periods: links gained and lost"]].forEach(([f, cap], k) => {
   const x = 0.6 + (k % 2) * 6.2, y = 1.4 + Math.floor(k / 2) * 2.85;
   image(s, f, x, y, 3.85);
   text(s, cap, { x: x + 4.05, y: y + 0.2, w: 1.95, h: 1.6, fontSize: 15, color: INK });
 });
-s.addNotes("Live demo: open the Atlas, search r/personalfinance, play the crowds story, compare two periods. Every view is a URL; the Streamlit console shows data collection and cleaning.");
+s.addNotes("Live demo: Start page scroll (hairball to map), a discovery with its takeaway, the atlas drawer, then How it's made. Every view is a URL; the Streamlit console shows data collection and cleaning.");
 
 // 11 --------------------------------------------------------------- evolution
 pres.addSection({ title: "Evolution and limits" });
@@ -255,13 +264,13 @@ steps.forEach(([h, d], k) => {
   text(s, d, { x, y: 2.9, w: 2.2, h: 2.2, fontSize: 14 });
 });
 card(s, 0.6, 5.35, 12.1, 1.35, "evo-note");
-text(s, "V1 is preserved unchanged at git tag v1-baseline. The occupant-turnover hypothesis is not claimed as proven or disproven: it needs many more bridge positions and a matched null, which is future work.", { x: 0.85, y: 5.5, w: 11.6, h: 1.05, fontSize: 15, valign: "middle" });
+text(s, "V1 is preserved unchanged at git tag v1-baseline. The submitted hypothesis is not answered here: testing whether bridge positions outlast their occupants needs link-level bridge positions on the validated network and a matched turnover null, which is future work.", { x: 0.85, y: 5.5, w: 11.6, h: 1.05, fontSize: 15, valign: "middle" });
 s.addNotes("The change of lens follows from evidence, not convenience. The original question survives as the connector role and the temporal stories.");
 
 // 12 --------------------------------------------------------------- limits
 s = content("Evolution and limits", "What we can and cannot conclude");
-const can = ["Which subreddit pairs share more commenters than size and activity explain", "That these links form stable topical communities and connector roles", "That audiences changed around dated events, and how affinity moved with them"];
-const cannot = ["Why audiences overlap: no text, so no topics, motives or sentiment", "That events caused the changes: associations only", "Anything about Reddit as a whole: a fixed sample of 170 subreddits, 12 months, commenters only, with archive gaps"];
+const can = ["Which subreddit pairs share more commenters than size and activity explain, and which share fewer", "That these links form stable topical communities, connector roles and sealed clusters", "That audiences changed around dated events, and how affinity and cross-posting moved with them"];
+const cannot = ["Why audiences overlap or keep apart: no text, so no topics, motives or sentiment", "That events caused the changes: associations only; and a changed affinity is not by itself a changed behaviour", `Anything about Reddit as a whole: a fixed sample of ${S.subreddits} subreddits, ${months.length} months, commenters only, with archive gaps`];
 [[can, "We can show", SER[2]], [cannot, "We cannot claim", SER[1]]].forEach(([list, h, c], k) => {
   const x = 0.6 + k * 6.2;
   card(s, x, 1.5, 5.9, 5.2, `limits-${k}`);
@@ -273,7 +282,7 @@ s.addNotes("Ethics: public data, salted hashes, aggregate-only publication, sens
 // 13 --------------------------------------------------------------- close
 s = pres.addSlide({ masterName: "TITLE", sectionTitle: "Evolution and limits" });
 s.addText("Size explains most raw overlap. What remains is a readable, stable map", { placeholder: "title" });
-s.addText(`${pct(S.validated_density.all)} of pairs, ${S.anchor.communities} communities, country-level neighbours, mid-sized connectors, and ties that loosen and tighten with crowds.`, { placeholder: "body" });
+s.addText(`${pct(S.validated_density.all)} of pairs, ${commPhrase}, country-level neighbours and audiences that keep apart, mid-sized connectors, and crowds whose trace is in the counts rather than in the ties.`, { placeholder: "body" });
 card(s, 7.1, 2.0, 5.6, 3.6, "run-card");
 text(s, "Run it", { x: 7.4, y: 2.2, w: 5, h: 0.45, fontSize: 18, bold: true, color: INK });
 text(s, "python atlas/serve.py\npython atlas/build_atlas.py\npython -m pytest tests/\nstreamlit run data_curation/dashboard.py", { x: 7.4, y: 2.75, w: 5.1, h: 1.9, fontSize: 15, fontFace: "Courier New", color: INK2 });
